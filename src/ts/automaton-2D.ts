@@ -19,6 +19,7 @@ class Automaton2D extends GLResource {
     private _textureSize: number[];
     private _textures: WebGLTexture[];
     private _currentIndex: number;
+    private _visibleSubTexture: number[];
 
     private _iteration: number;
 
@@ -30,12 +31,20 @@ class Automaton2D extends GLResource {
         this._FBO = new FBO(gl, 512, 512);
         this._vbo = VBO.createQuad(gl, -1, -1, 1, 1);
 
-        this._textures = [null, null];
-        this.initializeTextures(512, 512);
+        const initializeTexturesForCanvas = () => {
+            const canvasSize = Canvas.getSize();
+            this.initializeTextures(canvasSize[0], canvasSize[1]);
 
-        Button.addObserver("reset-button-id", () => {
-            this.initializeTextures(512, 512);
-        });
+            this._visibleSubTexture[0] = canvasSize[0] / this._textureSize[0];
+            this._visibleSubTexture[1] = canvasSize[1] / this._textureSize[1];
+        };
+
+        this._textures = [null, null];
+        this._visibleSubTexture = [0, 0];
+        initializeTexturesForCanvas();
+
+        Canvas.Observers.canvasResize.push(initializeTexturesForCanvas);
+        Button.addObserver("reset-button-id", initializeTexturesForCanvas);
 
         ShaderManager.buildShader(
             {
@@ -47,6 +56,7 @@ class Automaton2D extends GLResource {
                     /* tslint:disable:no-string-literal */
                     this._displayShader = shader;
                     this._displayShader.a["aCorner"].VBO = this._vbo;
+                    this._displayShader.u["uSubTexture"].value = this._visibleSubTexture;
                     /* tslint:enable:no-string-literal */
                 }
             });

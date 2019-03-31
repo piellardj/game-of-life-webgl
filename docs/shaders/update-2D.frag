@@ -24,15 +24,10 @@ void main(void)
 
     float currentState = state(coords);
 
-    if (currentState < 0.5) {
-        if (nbAliveNeighbours > 2.5 && nbAliveNeighbours < 3.5) {
-            currentState = 1.0;
-        }
-    } else {
-        if (nbAliveNeighbours < 1.5 || nbAliveNeighbours > 3.5) {
-            currentState = 0.0;
-        }
-    }
+    float ifDead = step(2.5, nbAliveNeighbours) * step(nbAliveNeighbours, 3.5);
+    float ifAlive = 1.0 - (step(nbAliveNeighbours, 1.5) + step(3.5, nbAliveNeighbours));
+
+    currentState = mix(ifDead, ifAlive, currentState);
 
     gl_FragColor = vec4(vec3(currentState), 1);
 }

@@ -130,11 +130,17 @@ var Automaton2D = (function (_super) {
         var _this = _super.call(this, gl_canvas_1.gl) || this;
         _this._FBO = new fbo_1.default(gl_canvas_1.gl, 512, 512);
         _this._vbo = vbo_1.default.createQuad(gl_canvas_1.gl, -1, -1, 1, 1);
+        var initializeTexturesForCanvas = function () {
+            var canvasSize = Canvas.getSize();
+            _this.initializeTextures(canvasSize[0], canvasSize[1]);
+            _this._visibleSubTexture[0] = canvasSize[0] / _this._textureSize[0];
+            _this._visibleSubTexture[1] = canvasSize[1] / _this._textureSize[1];
+        };
         _this._textures = [null, null];
-        _this.initializeTextures(512, 512);
-        Button.addObserver("reset-button-id", function () {
-            _this.initializeTextures(512, 512);
-        });
+        _this._visibleSubTexture = [0, 0];
+        initializeTexturesForCanvas();
+        Canvas.Observers.canvasResize.push(initializeTexturesForCanvas);
+        Button.addObserver("reset-button-id", initializeTexturesForCanvas);
         ShaderManager.buildShader({
             fragmentFilename: "display-2D.frag",
             vertexFilename: "display-2D.vert",
@@ -142,6 +148,7 @@ var Automaton2D = (function (_super) {
             if (shader !== null) {
                 _this._displayShader = shader;
                 _this._displayShader.a["aCorner"].VBO = _this._vbo;
+                _this._displayShader.u["uSubTexture"].value = _this._visibleSubTexture;
             }
         });
         ShaderManager.buildShader({
