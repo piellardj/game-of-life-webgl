@@ -1,0 +1,29 @@
+{
+  "name": "game-of-life-webg",
+  "version": "0.0.1",
+  "description": "Panorama viewer and editor",
+  "main": "build/index.js",
+  "scripts": {
+    "build-demo-js": "npm run tsc && npm run webpack && npm run webpack-production",
+    "build-page-template": "node src/generate-page-template.js",
+    "build-shaders": "node src/build-shaders.js",
+    "build": "npm run build-page-template && npm run build-shaders && npm run build-demo-js",
+    "rebuild": "npm run clean && npm run build",
+    "clean": "shx rm -rf build/ tmp/ docs/*",
+    "lint": "tslint -c src/config/tslint.json -p src/config/tsconfig.json",
+    "tsc": "tsc -p src/config/tsconfig.json",
+    "webpack": "webpack --config src/config/webpack.config.js --mode=development --output docs/script/main.js",
+    "webpack-production": "webpack --config src/config/webpack.config.js --mode=production --output docs/script/main.min.js"
+  },
+  "author": "“Jérémie PIELLARD <jeremie.piellard@gmail.com> (https://github.com/piellardj)",
+  "license": "ISC",
+  "devDependencies": {
+    "fs-extra": "^7.0.1",
+    "shx": "^0.3.2",
+    "tslint": "^5.13.1",
+    "typescript": "^3.3.3333",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.2.3",
+    "webpage-templates": "github:piellardj/webpage-templates"
+  }
+}
