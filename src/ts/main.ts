@@ -3,7 +3,7 @@ import * as GlCanvas from "./gl-utils/gl-canvas";
 import { gl } from "./gl-utils/gl-canvas";
 import Viewport from "./gl-utils/viewport";
 
-import Automata2D from "./automata-2D";
+import Automaton2D from "./automaton-2D";
 import Parameters from "./parameters";
 
 declare const Canvas: any;
@@ -18,16 +18,16 @@ function main() {
 
     Parameters.autorun = true;
 
-    const automata = new Automata2D();
+    const automaton = new Automaton2D();
 
     function mainLoop() {
         if (Parameters.autorun) {
             /* Update */
-            automata.update();
+            automaton.update();
         }
 
-        if (Parameters.autorun || automata.needToRedraw) {
-            Canvas.setIndicatorText("Iteration", automata.iteration);
+        if (Parameters.autorun || automaton.needToRedraw) {
+            Canvas.setIndicatorText("Iteration", automaton.iteration);
 
             /* Display */
             FBO.bindDefault(gl);
@@ -39,7 +39,7 @@ function main() {
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             /* tslint:enable:no-bitwise */
 
-            automata.draw();
+            automaton.draw();
         }
 
         requestAnimationFrame(mainLoop);

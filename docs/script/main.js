@@ -86,10 +86,10 @@
 /************************************************************************/
 /******/ ({
 
-/***/ "./tmp/script/automata-2D.js":
-/*!***********************************!*\
-  !*** ./tmp/script/automata-2D.js ***!
-  \***********************************/
+/***/ "./tmp/script/automaton-2D.js":
+/*!************************************!*\
+  !*** ./tmp/script/automaton-2D.js ***!
+  \************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -124,9 +124,9 @@ var gl_canvas_1 = __webpack_require__(/*! ./gl-utils/gl-canvas */ "./tmp/script/
 var gl_resource_1 = __importDefault(__webpack_require__(/*! ./gl-utils/gl-resource */ "./tmp/script/gl-utils/gl-resource.js"));
 var vbo_1 = __importDefault(__webpack_require__(/*! ./gl-utils/vbo */ "./tmp/script/gl-utils/vbo.js"));
 var ShaderManager = __importStar(__webpack_require__(/*! ./gl-utils/shader-manager */ "./tmp/script/gl-utils/shader-manager.js"));
-var Automata2D = (function (_super) {
-    __extends(Automata2D, _super);
-    function Automata2D() {
+var Automaton2D = (function (_super) {
+    __extends(Automaton2D, _super);
+    function Automaton2D() {
         var _this = _super.call(this, gl_canvas_1.gl) || this;
         _this._FBO = new fbo_1.default(gl_canvas_1.gl, 512, 512);
         _this._vbo = vbo_1.default.createQuad(gl_canvas_1.gl, -1, -1, 1, 1);
@@ -155,7 +155,7 @@ var Automata2D = (function (_super) {
         });
         return _this;
     }
-    Automata2D.prototype.freeGLResources = function () {
+    Automaton2D.prototype.freeGLResources = function () {
         if (this._FBO) {
             this._FBO.freeGLResources();
         }
@@ -173,7 +173,7 @@ var Automata2D = (function (_super) {
         }
         this.freeTextures();
     };
-    Automata2D.prototype.update = function () {
+    Automaton2D.prototype.update = function () {
         var shader = this._updateShader;
         if (shader) {
             var current = this._textures[this._currentIndex];
@@ -188,7 +188,7 @@ var Automata2D = (function (_super) {
             this._iteration++;
         }
     };
-    Automata2D.prototype.draw = function () {
+    Automaton2D.prototype.draw = function () {
         var shader = this._displayShader;
         if (shader) {
             shader.u["uTexture"].value = this._textures[this._currentIndex];
@@ -199,21 +199,21 @@ var Automata2D = (function (_super) {
             this._needToRedraw = false;
         }
     };
-    Object.defineProperty(Automata2D.prototype, "iteration", {
+    Object.defineProperty(Automaton2D.prototype, "iteration", {
         get: function () {
             return this._iteration;
         },
         enumerable: true,
         configurable: true
     });
-    Object.defineProperty(Automata2D.prototype, "needToRedraw", {
+    Object.defineProperty(Automaton2D.prototype, "needToRedraw", {
         get: function () {
             return this._needToRedraw;
         },
         enumerable: true,
         configurable: true
     });
-    Automata2D.prototype.freeTextures = function () {
+    Automaton2D.prototype.freeTextures = function () {
         for (var i = 0; i < 2; ++i) {
             if (this._textures[i]) {
                 gl_canvas_1.gl.deleteTexture(this._textures[i]);
@@ -221,7 +221,7 @@ var Automata2D = (function (_super) {
             }
         }
     };
-    Automata2D.prototype.initializeTextures = function (width, height) {
+    Automaton2D.prototype.initializeTextures = function (width, height) {
         function upperPowerOfTwo(n) {
             return Math.pow(2, Math.ceil(Math.log(n) * Math.LOG2E));
         }
@@ -250,9 +250,9 @@ var Automata2D = (function (_super) {
         this._iteration = 0;
         this._needToRedraw = true;
     };
-    return Automata2D;
+    return Automaton2D;
 }(gl_resource_1.default));
-exports.default = Automata2D;
+exports.default = Automaton2D;
 
 
 /***/ }),
@@ -918,7 +918,7 @@ var fbo_1 = __importDefault(__webpack_require__(/*! ./gl-utils/fbo */ "./tmp/scr
 var GlCanvas = __importStar(__webpack_require__(/*! ./gl-utils/gl-canvas */ "./tmp/script/gl-utils/gl-canvas.js"));
 var gl_canvas_1 = __webpack_require__(/*! ./gl-utils/gl-canvas */ "./tmp/script/gl-utils/gl-canvas.js");
 var viewport_1 = __importDefault(__webpack_require__(/*! ./gl-utils/viewport */ "./tmp/script/gl-utils/viewport.js"));
-var automata_2D_1 = __importDefault(__webpack_require__(/*! ./automata-2D */ "./tmp/script/automata-2D.js"));
+var automaton_2D_1 = __importDefault(__webpack_require__(/*! ./automaton-2D */ "./tmp/script/automaton-2D.js"));
 var parameters_1 = __importDefault(__webpack_require__(/*! ./parameters */ "./tmp/script/parameters.js"));
 function main() {
     var glParams = { alpha: false };
@@ -927,18 +927,18 @@ function main() {
     }
     Canvas.showLoader(true);
     parameters_1.default.autorun = true;
-    var automata = new automata_2D_1.default();
+    var automaton = new automaton_2D_1.default();
     function mainLoop() {
         if (parameters_1.default.autorun) {
-            automata.update();
+            automaton.update();
         }
-        if (parameters_1.default.autorun || automata.needToRedraw) {
-            Canvas.setIndicatorText("Iteration", automata.iteration);
+        if (parameters_1.default.autorun || automaton.needToRedraw) {
+            Canvas.setIndicatorText("Iteration", automaton.iteration);
             fbo_1.default.bindDefault(gl_canvas_1.gl);
             GlCanvas.adjustSize();
             viewport_1.default.setFullCanvas(gl_canvas_1.gl);
             gl_canvas_1.gl.clear(gl_canvas_1.gl.COLOR_BUFFER_BIT | gl_canvas_1.gl.DEPTH_BUFFER_BIT);
-            automata.draw();
+            automaton.draw();
         }
         requestAnimationFrame(mainLoop);
     }

@@ -9,7 +9,7 @@ import * as ShaderManager from "./gl-utils/shader-manager";
 declare const Button: any;
 declare const Canvas: any;
 
-class Automata2D extends GLResource {
+class Automaton2D extends GLResource {
     private _displayShader: Shader;
     private _updateShader: Shader;
 
@@ -186,4 +186,4 @@ class Automata2D extends GLResource {
     }
 }
 
-export default Automata2D;
+export default Automaton2D;
