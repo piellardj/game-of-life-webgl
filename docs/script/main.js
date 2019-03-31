@@ -132,6 +132,9 @@ var Automata2D = (function (_super) {
         _this._vbo = vbo_1.default.createQuad(gl_canvas_1.gl, -1, -1, 1, 1);
         _this._textures = [null, null];
         _this.initializeTextures(512, 512);
+        Button.addObserver("reset-button-id", function () {
+            _this.initializeTextures(512, 512);
+        });
         ShaderManager.buildShader({
             fragmentFilename: "display-2D.frag",
             vertexFilename: "display-2D.vert",
@@ -193,11 +196,19 @@ var Automata2D = (function (_super) {
             shader.bindUniformsAndAttributes();
             gl_canvas_1.gl.drawArrays(gl_canvas_1.gl.TRIANGLE_STRIP, 0, 4);
             Canvas.showLoader(false);
+            this._needToRedraw = false;
         }
     };
     Object.defineProperty(Automata2D.prototype, "iteration", {
         get: function () {
             return this._iteration;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Automata2D.prototype, "needToRedraw", {
+        get: function () {
+            return this._needToRedraw;
         },
         enumerable: true,
         configurable: true
@@ -237,6 +248,7 @@ var Automata2D = (function (_super) {
         }
         this._currentIndex = 0;
         this._iteration = 0;
+        this._needToRedraw = true;
     };
     return Automata2D;
 }(gl_resource_1.default));
@@ -919,6 +931,8 @@ function main() {
     function mainLoop() {
         if (parameters_1.default.autorun) {
             automata.update();
+        }
+        if (parameters_1.default.autorun || automata.needToRedraw) {
             Canvas.setIndicatorText("Iteration", automata.iteration);
             fbo_1.default.bindDefault(gl_canvas_1.gl);
             GlCanvas.adjustSize();

@@ -6,6 +6,7 @@ import VBO from "./gl-utils/vbo";
 import Shader from "./gl-utils/shader";
 import * as ShaderManager from "./gl-utils/shader-manager";
 
+declare const Button: any;
 declare const Canvas: any;
 
 class Automata2D extends GLResource {
@@ -21,6 +22,8 @@ class Automata2D extends GLResource {
 
     private _iteration: number;
 
+    private  _needToRedraw: boolean;
+
     constructor() {
         super(gl);
 
@@ -29,6 +32,10 @@ class Automata2D extends GLResource {
 
         this._textures = [null, null];
         this.initializeTextures(512, 512);
+
+        Button.addObserver("reset-button-id", () => {
+            this.initializeTextures(512, 512);
+        });
 
         ShaderManager.buildShader(
             {
@@ -120,11 +127,16 @@ class Automata2D extends GLResource {
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
             Canvas.showLoader(false);
+            this._needToRedraw = false;
         }
     }
 
     public get iteration(): number {
         return this._iteration;
+    }
+
+    public get needToRedraw(): boolean {
+        return this._needToRedraw;
     }
 
     private freeTextures(): void {
@@ -170,6 +182,7 @@ class Automata2D extends GLResource {
 
         this._currentIndex = 0;
         this._iteration = 0;
+        this._needToRedraw = true;
     }
 }
 

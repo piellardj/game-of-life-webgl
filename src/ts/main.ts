@@ -24,7 +24,9 @@ function main() {
         if (Parameters.autorun) {
             /* Update */
             automata.update();
+        }
 
+        if (Parameters.autorun || automata.needToRedraw) {
             Canvas.setIndicatorText("Iteration", automata.iteration);
 
             /* Display */

@@ -27,6 +27,12 @@
                     "id": "stop-start-button-id",
                     "label": "Stop",
                     "flat": true
+                },
+                {
+                    "type": "button",
+                    "id": "reset-button-id",
+                    "label": "Reset",
+                    "flat": true
                 }
             ]
         }
