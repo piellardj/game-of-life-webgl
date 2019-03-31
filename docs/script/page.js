@@ -512,4 +512,428 @@ const Canvas = (function() {
     });
 })();
 
-Canvas.setMaxSize(512,512);
+/* exported FileControl */
+const FileControl = (function() {
+    const filenameMaxSize = 16;
+
+    /**
+     * @param {string} name
+     * @return {string}
+     */
+    function truncate(name) {
+        if (name.length > filenameMaxSize) {
+            return name.substring(0, 15) + "..." +
+                name.substring(name.length-15);
+        }
+        return name;
+    }
+
+    /**
+     * @param {string} selector
+     * @return {Object} Html node or null if not found
+     */
+    function getElementBySelector(selector) {
+        const elt = document.querySelector(selector);
+        if (!elt) {
+            console.error("Cannot find input file '" + selector + "'.");
+        }
+        return elt;
+    }
+
+    /**
+     * @param {string} id
+     * @return {Object} Html node or null if not found
+     */
+    function getUploadInputById(id) {
+        const selector = "input[type=file][id=" + id + "]";
+        return getElementBySelector(selector);
+    }
+
+    /**
+     * @param {string} id
+     * @return {Object} Html node or null if not found
+     */
+    function getDownloadLabel(id) {
+        const selector = ".file-control.download > label[id=" + id + "]";
+        return getElementBySelector(selector);
+    }
+
+    /* Bind event so that filename is displayed on upload */
+    const labelsSelector = ".file-control.upload > label";
+    window.addEventListener("load", function() {
+        const labels = document.querySelectorAll(labelsSelector);
+        Array.prototype.forEach.call(labels, function(label) {
+            const input = getUploadInputById(label.htmlFor);
+            if (input) {
+                const span = label.querySelector("span");
+                input.addEventListener("change", function(event) {
+                    span.innerText = truncate(input.files[0].name);
+                }, false);
+            }
+        });
+    });
+
+    return Object.freeze({
+        /**
+         * @param {string} id
+         * @param {Object} observer Callback function
+         * @return {boolean} Whether or not the observer was added
+         */
+        addDownloadObserver: function(id, observer) {
+            const elt = getDownloadLabel(id);
+            if (elt) {
+                elt.addEventListener("click", function() {
+                    event.stopPropagation();
+                    observer();
+                }, false);
+                return true;
+            }
+
+            return false;
+        },
+
+        /**
+         * @param {string} uploadId
+         * @param {Object} observer Callback function
+         * @return {boolean} Whether or not the observer was added
+         */
+        addUploadObserver: function(uploadId, observer) {
+            const input = getUploadInputById(uploadId);
+            if (input) {
+                input.addEventListener("change", function() {
+                    event.stopPropagation();
+                    observer(input.files);
+                }, false);
+                return true;
+            }
+
+            return false;
+        },
+    });
+})();
+
+/* exported Checkbox */
+const Checkbox = (function() {
+    /**
+     * @param {string} id
+     * @return {Object} Html node or null if not found
+     */
+    function getCheckboxFromId(id) {
+        const selector = "input[type=checkbox][id=" + id + "]";
+        const elt = document.querySelector(selector);
+        if (!elt) {
+            console.error("Cannot find checkbox '" + selector + "'.");
+        }
+        return elt;
+    }
+
+    return Object.freeze({
+        /**
+         * @param {string} checkboxId
+         * @param {Object} observer Callback method
+         * @return {boolean} Whether or not the observer was added
+         */
+        addObserver: function(checkboxId, observer) {
+            const elt = getCheckboxFromId(checkboxId);
+            if (elt) {
+                elt.addEventListener("change", function(event) {
+                    event.stopPropagation();
+                    observer(event.target.checked);
+                }, false);
+                return true;
+            }
+
+            return false;
+        },
+
+        /**
+         * @param {string} checkboxId
+         * @param {boolean} value
+         * @return {void}
+         */
+        setChecked: function(checkboxId, value) {
+            const elt = getCheckboxFromId(checkboxId);
+            if (elt) {
+                elt.checked = value ? true : false;
+            }
+        },
+
+        /**
+         * @param {string} checkboxId
+         * @return {boolean}
+         */
+        isChecked: function(checkboxId) {
+            const elt = getCheckboxFromId(checkboxId);
+            return elt && elt.checked;
+        },
+    });
+})();
+
+/* exported Range */
+const Range = (function() {
+    /**
+     * @param {Object} elt Html node element
+     * @return {boolean}
+     */
+    function isRangeElement(elt) {
+        return elt.type && elt.type.toLowerCase() === "range";
+    }
+
+    /**
+     * @param {string} id
+     * @return {Object} Html node or null if not found
+     */
+    function getRangeById(id) {
+        const selector = "input[type=range][id=" + id + "]";
+        const elt = document.querySelector(selector);
+        if (!elt) {
+            console.error("Cannot find range '" + selector + "'.");
+        }
+        return elt;
+    }
+
+    /**
+     * @param {string} rangeId
+     * @param {Object} observer Callback method
+     * @param {string} eventName Event on which the callback is called
+     * @return {boolean} Whether or not the observer was added
+     */
+    function addObserver(rangeId, observer, eventName) {
+        const elt = getRangeById(rangeId);
+        if (elt) {
+            elt.addEventListener(eventName, function(event) {
+                event.stopPropagation();
+                observer(+elt.value);
+            }, false);
+            return true;
+        }
+
+        return false;
+    }
+
+    const thumbSize = 16;
+    /**
+     *
+     * @param {Object} range    Node element
+     * @param {Object} tooltip  Node element
+     * @return {void}
+     */
+    function updateTooltipPosition(range, tooltip) {
+        tooltip.textContent = range.value;
+
+        const bodyRect = document.body.getBoundingClientRect();
+        const rangeRect = range.getBoundingClientRect();
+        const tooltipRect = tooltip.getBoundingClientRect();
+
+        const percentage = (range.value - range.min) / (range.max - range.min);
+
+        const top = (rangeRect.top - tooltipRect.height - bodyRect.top) - 4;
+        const middle = percentage * (rangeRect.width - thumbSize) +
+            (rangeRect.left + 0.5*thumbSize) - bodyRect.left;
+
+        tooltip.style.top = top + "px";
+        tooltip.style.left = (middle - 0.5 * tooltipRect.width) + "px";
+    }
+
+    window.addEventListener("load", function() {
+        const tooltips = document.querySelectorAll(".tooltip");
+        Array.prototype.forEach.call(tooltips, function(tooltip) {
+            const range = tooltip.previousElementSibling;
+            if (isRangeElement(range)) {
+                range.parentNode.addEventListener("mouseenter", function() {
+                    updateTooltipPosition(range, tooltip);
+                }, false);
+
+                range.addEventListener("input", function() {
+                    updateTooltipPosition(range, tooltip);
+                }, false);
+            }
+        });
+    });
+
+    const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
+
+    return Object.freeze({
+        /**
+         * Callback will be called every time the value changes.
+         * @param {string} rangeId
+         * @param {Object} observer Callback method
+         * @return {boolean} Whether or not the observer was added
+         */
+        addObserver: function(rangeId, observer) {
+            if (isIE11) { // bug in IE 11, input event is never fired
+                return addObserver(rangeId, observer, "change");
+            } else {
+                return addObserver(rangeId, observer, "input");
+            }
+        },
+
+        /**
+         * Callback will be called only when the value stops changing.
+         * @param {string} rangeId
+         * @param {Object} observer Callback method
+         * @return {boolean} Whether or not the observer was added
+         */
+        addLazyObserver: function(rangeId, observer) {
+            return addObserver(rangeId, observer, "change");
+        },
+
+        /**
+         * @param {string} rangeId
+         * @return {number}
+         */
+        getValue: function(rangeId) {
+            const elt = getRangeById(rangeId);
+            if (!elt) {
+                return null;
+            }
+            return +elt.value;
+        },
+
+        /**
+         * @param {string} rangeId
+         * @param {number} value
+         */
+        setValue: function(rangeId, value) {
+            const elt = getRangeById(rangeId);
+            if (elt) {
+                elt.value = value;
+            }
+        },
+    });
+})();
+
+/* exported Tabs */
+const Tabs = (function() {
+    /**
+     * @param {string} group
+     * @return {Object} Html node or null if not found
+     */
+    function getTabsByGroup(group) {
+        const selector = "div.tabs[id=" + group + "-id]";
+        const elt = document.querySelector(selector);
+        if (!elt) {
+            console.error("Cannot find tabs '" + selector + "'.");
+        }
+        return elt;
+    }
+
+    /**
+     * @param {Object} tabsElt Node tab element
+     * @return {string[]}
+     */
+    function getSelectedValues(tabsElt) {
+        const values = [];
+        const inputs = tabsElt.querySelectorAll("input");
+        Array.prototype.forEach.call(inputs, function(input) {
+            if (input.checked) {
+                values.push(input.value);
+            }
+        });
+
+        return values;
+    }
+
+    return Object.freeze({
+        /**
+         * @param {string} tabsGroup
+         * @param {Object} observer Callback method
+         * @return {boolean} Whether or not the observer was added
+         */
+        addObserver: function(tabsGroup, observer) {
+            const divWrapper = getTabsByGroup(tabsGroup);
+            if (divWrapper) {
+                const inputs = divWrapper.querySelectorAll("input");
+                Array.prototype.forEach.call(inputs, function(input) {
+                    input.addEventListener("change", function(event) {
+                        event.stopPropagation();
+                        observer(getSelectedValues(divWrapper));
+                    }, false);
+                });
+                return true;
+            }
+
+            return false;
+        },
+
+        /**
+         * @param {string} tabsGroup
+         * @return {string[]}
+         */
+        getValues: function(tabsGroup) {
+            const divWrapper = getTabsByGroup(tabsGroup);
+            if (!divWrapper) {
+                return [];
+            }
+
+            return getSelectedValues(divWrapper);
+        },
+
+        /**
+         * @param {sting} tabsGroup
+         * @param {string[]} values
+         * @return {void}
+         */
+        setValues: function(tabsGroup, values) {
+            const divWrapper = getTabsByGroup(tabsGroup);
+            const inputs = divWrapper.querySelectorAll("input");
+            Array.prototype.forEach.call(inputs, function(input) {
+                input.checked = false;
+            });
+
+            for (let i = 0; i < values.length; ++i) {
+                const id = tabsGroup + "-" + values[i] + "-id";
+                divWrapper.querySelector("input[id=" + id + "]").checked = true;
+            }
+        },
+    });
+})();
+
+/* exported Button */
+const Button = (function() {
+    /**
+     * @param {string} id
+     * @return {Object} Html node or null if not found
+     */
+    function getButtonById(id) {
+        const selector = "button[id=" + id + "]";
+        const elt = document.querySelector(selector);
+        if (!elt) {
+            console.error("Cannot find button '" + checkboxId + "'.");
+        }
+        return elt;
+    }
+
+    return Object.freeze({
+        /**
+         * @param {string} buttonId
+         * @param {Object} observer Callback function
+         * @return {boolean} Whether or not the observer was added
+         */
+        addObserver: function(buttonId, observer) {
+            const elt = getButtonById(buttonId);
+            if (elt) {
+                elt.addEventListener("click", function(event) {
+                    event.stopPropagation();
+                    observer();
+                }, false);
+                return true;
+            }
+
+            return false;
+        },
+
+        /**
+         * @param {string} buttonId
+         * @param {string} label
+         */
+        setLabel: function(buttonId, label) {
+            const elt = getButtonById(buttonId);
+            if (elt) {
+                elt.innerText = label;
+            }
+        },
+    });
+})();
+
+Canvas.setMaxSize(768,512);

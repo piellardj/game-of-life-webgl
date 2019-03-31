@@ -907,26 +907,66 @@ var GlCanvas = __importStar(__webpack_require__(/*! ./gl-utils/gl-canvas */ "./t
 var gl_canvas_1 = __webpack_require__(/*! ./gl-utils/gl-canvas */ "./tmp/script/gl-utils/gl-canvas.js");
 var viewport_1 = __importDefault(__webpack_require__(/*! ./gl-utils/viewport */ "./tmp/script/gl-utils/viewport.js"));
 var automata_2D_1 = __importDefault(__webpack_require__(/*! ./automata-2D */ "./tmp/script/automata-2D.js"));
+var parameters_1 = __importDefault(__webpack_require__(/*! ./parameters */ "./tmp/script/parameters.js"));
 function main() {
     var glParams = { alpha: false };
     if (!GlCanvas.initGL(glParams)) {
         return;
     }
     Canvas.showLoader(true);
+    parameters_1.default.autorun = true;
     var automata = new automata_2D_1.default();
     function mainLoop() {
-        automata.update();
-        Canvas.setIndicatorText("Iteration", automata.iteration);
-        fbo_1.default.bindDefault(gl_canvas_1.gl);
-        GlCanvas.adjustSize();
-        viewport_1.default.setFullCanvas(gl_canvas_1.gl);
-        gl_canvas_1.gl.clear(gl_canvas_1.gl.COLOR_BUFFER_BIT | gl_canvas_1.gl.DEPTH_BUFFER_BIT);
-        automata.draw();
+        if (parameters_1.default.autorun) {
+            automata.update();
+            Canvas.setIndicatorText("Iteration", automata.iteration);
+            fbo_1.default.bindDefault(gl_canvas_1.gl);
+            GlCanvas.adjustSize();
+            viewport_1.default.setFullCanvas(gl_canvas_1.gl);
+            gl_canvas_1.gl.clear(gl_canvas_1.gl.COLOR_BUFFER_BIT | gl_canvas_1.gl.DEPTH_BUFFER_BIT);
+            automata.draw();
+        }
         requestAnimationFrame(mainLoop);
     }
     requestAnimationFrame(mainLoop);
 }
 main();
+
+
+/***/ }),
+
+/***/ "./tmp/script/parameters.js":
+/*!**********************************!*\
+  !*** ./tmp/script/parameters.js ***!
+  \**********************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var autorun;
+var AUTORUN_CONTROL_ID = "stop-start-button-id";
+Button.addObserver(AUTORUN_CONTROL_ID, function () {
+    Parameters.autorun = !autorun;
+});
+var Parameters = (function () {
+    function Parameters() {
+    }
+    Object.defineProperty(Parameters, "autorun", {
+        get: function () {
+            return autorun;
+        },
+        set: function (ar) {
+            autorun = ar;
+            Button.setLabel(AUTORUN_CONTROL_ID, autorun ? "Stop" : "Start");
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return Parameters;
+}());
+exports.default = Parameters;
 
 
 /***/ })

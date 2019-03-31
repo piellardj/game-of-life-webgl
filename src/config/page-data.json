@@ -18,5 +18,17 @@
         "height": 512,
         "enableFullscreen": true
     },
-    "controlsSections": []
+    "controlsSections": [
+        {
+            "title": "Simulation",
+            "controls": [
+                {
+                    "type": "button",
+                    "id": "stop-start-button-id",
+                    "label": "Stop",
+                    "flat": true
+                }
+            ]
+        }
+    ]
 }
