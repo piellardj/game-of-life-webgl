@@ -249,6 +249,7 @@ var Automaton2D = (function (_super) {
         this._currentIndex = 0;
         this._iteration = 0;
         this._needToRedraw = true;
+        Canvas.setIndicatorText("Grid size", width + "x" + height);
     };
     return Automaton2D;
 }(gl_resource_1.default));

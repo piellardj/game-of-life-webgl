@@ -11,7 +11,8 @@
         "script/main.js"
     ],
     "indicators": [
-        "Iteration"
+        "Iteration",
+        "Grid size"
     ],
     "canvas": {
         "width": 512,
