@@ -25,6 +25,7 @@ class Automaton2D extends GLResource {
     private _iteration: number;
 
     private  _needToRedraw: boolean;
+    private  _mustClear: boolean;
 
     constructor() {
         super(gl);
@@ -40,13 +41,18 @@ class Automaton2D extends GLResource {
             this._visibleSubTexture[1] = canvasSize[1] / this._textureSize[1];
         };
 
+        this._mustClear = true;
+
         this._textures = [null, null];
         this._visibleSubTexture = [0, 0];
         initializeTexturesForCanvas();
 
         Canvas.Observers.canvasResize.push(initializeTexturesForCanvas);
         Button.addObserver("reset-button-id", initializeTexturesForCanvas);
-        Parameters.scaleObservers.push(() => { this._needToRedraw = true; });
+        Parameters.scaleObservers.push(() => {
+            this._needToRedraw = true;
+            this._mustClear = true;
+        });
 
         ShaderManager.buildShader(
             {
@@ -118,6 +124,7 @@ class Automaton2D extends GLResource {
             shader.use();
             shader.bindUniformsAndAttributes();
 
+            gl.disable(gl.BLEND);
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
             this._currentIndex = (this._currentIndex + 1) % 2;
@@ -131,16 +138,19 @@ class Automaton2D extends GLResource {
         if (shader) {
             /* tslint:disable:no-string-literal */
             shader.u["uScale"].value = Parameters.scale;
+            shader.u["uClearFactor"].value = (this._mustClear) ? 1 : 1 - Parameters.persistence;
             shader.u["uTexture"].value = this._textures[this._currentIndex];
             /* tslint:enable:no-string-literal */
 
             shader.use();
             shader.bindUniformsAndAttributes();
 
+            gl.enable(gl.BLEND);
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
             Canvas.showLoader(false);
             this._needToRedraw = false;
+            this._mustClear = false;
         }
     }
 

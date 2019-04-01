@@ -137,12 +137,16 @@ var Automaton2D = (function (_super) {
             _this._visibleSubTexture[0] = canvasSize[0] / _this._textureSize[0];
             _this._visibleSubTexture[1] = canvasSize[1] / _this._textureSize[1];
         };
+        _this._mustClear = true;
         _this._textures = [null, null];
         _this._visibleSubTexture = [0, 0];
         initializeTexturesForCanvas();
         Canvas.Observers.canvasResize.push(initializeTexturesForCanvas);
         Button.addObserver("reset-button-id", initializeTexturesForCanvas);
-        parameters_1.default.scaleObservers.push(function () { _this._needToRedraw = true; });
+        parameters_1.default.scaleObservers.push(function () {
+            _this._needToRedraw = true;
+            _this._mustClear = true;
+        });
         ShaderManager.buildShader({
             fragmentFilename: "display-2D.frag",
             vertexFilename: "display-2D.vert",
@@ -192,6 +196,7 @@ var Automaton2D = (function (_super) {
             shader.u["uCellSize"].value = [1 / this._textureSize[0], 1 / this._textureSize[1]];
             shader.use();
             shader.bindUniformsAndAttributes();
+            gl_canvas_1.gl.disable(gl_canvas_1.gl.BLEND);
             gl_canvas_1.gl.drawArrays(gl_canvas_1.gl.TRIANGLE_STRIP, 0, 4);
             this._currentIndex = (this._currentIndex + 1) % 2;
             this._iteration++;
@@ -201,12 +206,15 @@ var Automaton2D = (function (_super) {
         var shader = this._displayShader;
         if (shader) {
             shader.u["uScale"].value = parameters_1.default.scale;
+            shader.u["uClearFactor"].value = (this._mustClear) ? 1 : 1 - parameters_1.default.persistence;
             shader.u["uTexture"].value = this._textures[this._currentIndex];
             shader.use();
             shader.bindUniformsAndAttributes();
+            gl_canvas_1.gl.enable(gl_canvas_1.gl.BLEND);
             gl_canvas_1.gl.drawArrays(gl_canvas_1.gl.TRIANGLE_STRIP, 0, 4);
             Canvas.showLoader(false);
             this._needToRedraw = false;
+            this._mustClear = false;
         }
     };
     Object.defineProperty(Automaton2D.prototype, "iteration", {
@@ -932,24 +940,30 @@ var viewport_1 = __importDefault(__webpack_require__(/*! ./gl-utils/viewport */ 
 var automaton_2D_1 = __importDefault(__webpack_require__(/*! ./automaton-2D */ "./tmp/script/automaton-2D.js"));
 var parameters_1 = __importDefault(__webpack_require__(/*! ./parameters */ "./tmp/script/parameters.js"));
 function main() {
-    var glParams = { alpha: false };
+    var glParams = {
+        alpha: false,
+        preserveDrawingBuffer: true,
+    };
     if (!GlCanvas.initGL(glParams)) {
         return;
     }
+    gl_canvas_1.gl.blendFunc(gl_canvas_1.gl.ONE, gl_canvas_1.gl.ONE_MINUS_SRC_ALPHA);
     Canvas.showLoader(true);
     parameters_1.default.autorun = true;
     parameters_1.default.scale = 1;
+    parameters_1.default.persistence = 0;
     var automaton = new automaton_2D_1.default();
     function mainLoop() {
+        var updated = false;
         if (parameters_1.default.autorun) {
             automaton.update();
-        }
-        if (parameters_1.default.autorun || automaton.needToRedraw) {
             Canvas.setIndicatorText("Iteration", automaton.iteration);
+            updated = true;
+        }
+        if (updated || automaton.needToRedraw) {
             fbo_1.default.bindDefault(gl_canvas_1.gl);
             GlCanvas.adjustSize();
             viewport_1.default.setFullCanvas(gl_canvas_1.gl);
-            gl_canvas_1.gl.clear(gl_canvas_1.gl.COLOR_BUFFER_BIT | gl_canvas_1.gl.DEPTH_BUFFER_BIT);
             automaton.draw();
         }
         requestAnimationFrame(mainLoop);
@@ -976,6 +990,18 @@ var AUTORUN_CONTROL_ID = "stop-start-button-id";
 Button.addObserver(AUTORUN_CONTROL_ID, function () {
     Parameters.autorun = !autorun;
 });
+var persistence;
+var persistenceObservers = [];
+var persistenceScale = [0, .6, .7, .8, .9];
+var PERSISTENCE_CONTROL_ID = "persistence-range-id";
+Range.addObserver(PERSISTENCE_CONTROL_ID, function (newValue) {
+    persistence = newValue;
+    for (var _i = 0, persistenceObservers_1 = persistenceObservers; _i < persistenceObservers_1.length; _i++) {
+        var observer = persistenceObservers_1[_i];
+        observer(persistence);
+    }
+});
+persistence = Range.getValue(PERSISTENCE_CONTROL_ID);
 var scale;
 var scaleObservers = [];
 var SCALE_CONTROL_ID = "scale-range-id";
@@ -1014,6 +1040,23 @@ var Parameters = (function () {
     Object.defineProperty(Parameters, "scaleObservers", {
         get: function () {
             return scaleObservers;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Parameters, "persistence", {
+        get: function () {
+            return persistenceScale[persistence];
+        },
+        set: function (newValue) {
+            Range.setValue(PERSISTENCE_CONTROL_ID, newValue);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Parameters, "persistenceObservers", {
+        get: function () {
+            return persistenceObservers;
         },
         enumerable: true,
         configurable: true

@@ -48,6 +48,15 @@
                     "max": 10,
                     "value": 1,
                     "step": 1
+                },
+                {
+                    "title": "Persistence",
+                    "type": "range",
+                    "id": "persistence-range-id",
+                    "min": 0,
+                    "max": 4,
+                    "value": 0,
+                    "step": 1
                 }
             ]
         }
