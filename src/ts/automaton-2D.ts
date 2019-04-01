@@ -1,10 +1,11 @@
 import FBO from "./gl-utils/fbo";
 import { gl } from "./gl-utils/gl-canvas";
 import GLResource from "./gl-utils/gl-resource";
-import VBO from "./gl-utils/vbo";
-
 import Shader from "./gl-utils/shader";
 import * as ShaderManager from "./gl-utils/shader-manager";
+import VBO from "./gl-utils/vbo";
+
+import Parameters from "./parameters";
 
 declare const Button: any;
 declare const Canvas: any;
@@ -45,6 +46,7 @@ class Automaton2D extends GLResource {
 
         Canvas.Observers.canvasResize.push(initializeTexturesForCanvas);
         Button.addObserver("reset-button-id", initializeTexturesForCanvas);
+        Parameters.scaleObservers.push(() => { this._needToRedraw = true; });
 
         ShaderManager.buildShader(
             {
@@ -128,6 +130,7 @@ class Automaton2D extends GLResource {
 
         if (shader) {
             /* tslint:disable:no-string-literal */
+            shader.u["uScale"].value = Parameters.scale;
             shader.u["uTexture"].value = this._textures[this._currentIndex];
             /* tslint:enable:no-string-literal */
 

@@ -17,6 +17,7 @@ function main() {
     Canvas.showLoader(true);
 
     Parameters.autorun = true;
+    Parameters.scale = 1;
 
     const automaton = new Automaton2D();
 

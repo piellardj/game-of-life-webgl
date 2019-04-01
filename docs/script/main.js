@@ -122,8 +122,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var fbo_1 = __importDefault(__webpack_require__(/*! ./gl-utils/fbo */ "./tmp/script/gl-utils/fbo.js"));
 var gl_canvas_1 = __webpack_require__(/*! ./gl-utils/gl-canvas */ "./tmp/script/gl-utils/gl-canvas.js");
 var gl_resource_1 = __importDefault(__webpack_require__(/*! ./gl-utils/gl-resource */ "./tmp/script/gl-utils/gl-resource.js"));
-var vbo_1 = __importDefault(__webpack_require__(/*! ./gl-utils/vbo */ "./tmp/script/gl-utils/vbo.js"));
 var ShaderManager = __importStar(__webpack_require__(/*! ./gl-utils/shader-manager */ "./tmp/script/gl-utils/shader-manager.js"));
+var vbo_1 = __importDefault(__webpack_require__(/*! ./gl-utils/vbo */ "./tmp/script/gl-utils/vbo.js"));
+var parameters_1 = __importDefault(__webpack_require__(/*! ./parameters */ "./tmp/script/parameters.js"));
 var Automaton2D = (function (_super) {
     __extends(Automaton2D, _super);
     function Automaton2D() {
@@ -141,6 +142,7 @@ var Automaton2D = (function (_super) {
         initializeTexturesForCanvas();
         Canvas.Observers.canvasResize.push(initializeTexturesForCanvas);
         Button.addObserver("reset-button-id", initializeTexturesForCanvas);
+        parameters_1.default.scaleObservers.push(function () { _this._needToRedraw = true; });
         ShaderManager.buildShader({
             fragmentFilename: "display-2D.frag",
             vertexFilename: "display-2D.vert",
@@ -198,6 +200,7 @@ var Automaton2D = (function (_super) {
     Automaton2D.prototype.draw = function () {
         var shader = this._displayShader;
         if (shader) {
+            shader.u["uScale"].value = parameters_1.default.scale;
             shader.u["uTexture"].value = this._textures[this._currentIndex];
             shader.use();
             shader.bindUniformsAndAttributes();
@@ -935,6 +938,7 @@ function main() {
     }
     Canvas.showLoader(true);
     parameters_1.default.autorun = true;
+    parameters_1.default.scale = 1;
     var automaton = new automaton_2D_1.default();
     function mainLoop() {
         if (parameters_1.default.autorun) {
@@ -972,6 +976,17 @@ var AUTORUN_CONTROL_ID = "stop-start-button-id";
 Button.addObserver(AUTORUN_CONTROL_ID, function () {
     Parameters.autorun = !autorun;
 });
+var scale;
+var scaleObservers = [];
+var SCALE_CONTROL_ID = "scale-range-id";
+Range.addObserver(SCALE_CONTROL_ID, function (newValue) {
+    scale = newValue;
+    for (var _i = 0, scaleObservers_1 = scaleObservers; _i < scaleObservers_1.length; _i++) {
+        var observer = scaleObservers_1[_i];
+        observer(scale);
+    }
+});
+scale = Range.getValue(SCALE_CONTROL_ID);
 var Parameters = (function () {
     function Parameters() {
     }
@@ -982,6 +997,23 @@ var Parameters = (function () {
         set: function (ar) {
             autorun = ar;
             Button.setLabel(AUTORUN_CONTROL_ID, autorun ? "Stop" : "Start");
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Parameters, "scale", {
+        get: function () {
+            return scale;
+        },
+        set: function (newValue) {
+            Range.setValue(SCALE_CONTROL_ID, newValue);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Parameters, "scaleObservers", {
+        get: function () {
+            return scaleObservers;
         },
         enumerable: true,
         configurable: true

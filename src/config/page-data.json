@@ -36,6 +36,20 @@
                     "flat": true
                 }
             ]
+        },
+        {
+            "title": "Rendering",
+            "controls": [
+                {
+                    "title": "Scale",
+                    "type": "range",
+                    "id": "scale-range-id",
+                    "min": 1,
+                    "max": 10,
+                    "value": 1,
+                    "step": 1
+                }
+            ]
         }
     ]
 }
