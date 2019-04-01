@@ -21,24 +21,35 @@ function main() {
 
     Canvas.showLoader(true);
 
+    let needToAdjustSize = true;
+    Canvas.Observers.canvasResize.push(() => needToAdjustSize = true);
+
     Parameters.autorun = true;
     Parameters.scale = 1;
     Parameters.persistence = 0;
 
     const automaton = new Automaton2D();
 
+    function updateIterationIndicator() {
+        Canvas.setIndicatorText("Iteration", automaton.iteration);
+    }
+    window.setInterval(updateIterationIndicator, 50);
+
     function mainLoop() {
         let updated = false;
         if (Parameters.autorun) {
             automaton.update();
-            Canvas.setIndicatorText("Iteration", automaton.iteration);
             updated = true;
         }
 
         if (updated || automaton.needToRedraw) {
             FBO.bindDefault(gl);
 
-            GlCanvas.adjustSize();
+            if (needToAdjustSize) {
+                GlCanvas.adjustSize();
+                needToAdjustSize = false;
+            }
+
             Viewport.setFullCanvas(gl);
 
             automaton.draw();

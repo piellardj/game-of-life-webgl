@@ -949,20 +949,28 @@ function main() {
     }
     gl_canvas_1.gl.blendFunc(gl_canvas_1.gl.ONE, gl_canvas_1.gl.ONE_MINUS_SRC_ALPHA);
     Canvas.showLoader(true);
+    var needToAdjustSize = true;
+    Canvas.Observers.canvasResize.push(function () { return needToAdjustSize = true; });
     parameters_1.default.autorun = true;
     parameters_1.default.scale = 1;
     parameters_1.default.persistence = 0;
     var automaton = new automaton_2D_1.default();
+    function updateIterationIndicator() {
+        Canvas.setIndicatorText("Iteration", automaton.iteration);
+    }
+    window.setInterval(updateIterationIndicator, 50);
     function mainLoop() {
         var updated = false;
         if (parameters_1.default.autorun) {
             automaton.update();
-            Canvas.setIndicatorText("Iteration", automaton.iteration);
             updated = true;
         }
         if (updated || automaton.needToRedraw) {
             fbo_1.default.bindDefault(gl_canvas_1.gl);
-            GlCanvas.adjustSize();
+            if (needToAdjustSize) {
+                GlCanvas.adjustSize();
+                needToAdjustSize = false;
+            }
             viewport_1.default.setFullCanvas(gl_canvas_1.gl);
             automaton.draw();
         }
