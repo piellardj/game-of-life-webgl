@@ -994,10 +994,11 @@ main();
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var autorun;
-var AUTORUN_CONTROL_ID = "stop-start-button-id";
-Button.addObserver(AUTORUN_CONTROL_ID, function () {
-    Parameters.autorun = !autorun;
+var AUTORUN_CONTROL_ID = "autorun-checkbox-id";
+Checkbox.addObserver(AUTORUN_CONTROL_ID, function (checked) {
+    autorun = checked;
 });
+autorun = Checkbox.isChecked(AUTORUN_CONTROL_ID);
 var persistence;
 var persistenceObservers = [];
 var persistenceScale = [0, .6, .7, .8, .9];
@@ -1030,7 +1031,7 @@ var Parameters = (function () {
         },
         set: function (ar) {
             autorun = ar;
-            Button.setLabel(AUTORUN_CONTROL_ID, autorun ? "Stop" : "Start");
+            Checkbox.setChecked(ar);
         },
         enumerable: true,
         configurable: true

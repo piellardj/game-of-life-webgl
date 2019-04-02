@@ -1,13 +1,15 @@
 declare const Button: any;
+declare const Checkbox: any;
 declare const Range: any;
 
 type RangeObserver = (newValue: number) => void;
 
 let autorun: boolean;
-const AUTORUN_CONTROL_ID = "stop-start-button-id";
-Button.addObserver(AUTORUN_CONTROL_ID, () => {
-    Parameters.autorun = !autorun;
+const AUTORUN_CONTROL_ID = "autorun-checkbox-id";
+Checkbox.addObserver(AUTORUN_CONTROL_ID, (checked: boolean) => {
+    autorun = checked;
 });
+autorun = Checkbox.isChecked(AUTORUN_CONTROL_ID);
 
 let persistence: number;
 const persistenceObservers: RangeObserver[] = [];
@@ -40,7 +42,7 @@ class Parameters {
     }
     public static set autorun(ar: boolean) {
         autorun = ar;
-        Button.setLabel(AUTORUN_CONTROL_ID, autorun ? "Stop" : "Start");
+        Checkbox.setChecked(ar);
     }
 
     public static get scale(): number {

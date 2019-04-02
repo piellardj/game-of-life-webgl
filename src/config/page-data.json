@@ -24,10 +24,10 @@
             "title": "Simulation",
             "controls": [
                 {
-                    "type": "button",
-                    "id": "stop-start-button-id",
-                    "label": "Stop",
-                    "flat": true
+                    "title": "Autorun",
+                    "type": "checkbox",
+                    "id": "autorun-checkbox-id",
+                    "checked": true
                 },
                 {
                     "type": "button",
