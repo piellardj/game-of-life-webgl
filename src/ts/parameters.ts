@@ -11,6 +11,14 @@ Checkbox.addObserver(AUTORUN_CONTROL_ID, (checked: boolean) => {
 });
 autorun = Checkbox.isChecked(AUTORUN_CONTROL_ID);
 
+const NEXT_STEP_CONTROL_ID = "next-button-id";
+const nextStepObservers: (() => void)[] = [];
+Button.addObserver(NEXT_STEP_CONTROL_ID,  () => {
+    for (const observer of nextStepObservers) {
+        observer();
+    }
+});
+
 let persistence: number;
 const persistenceObservers: RangeObserver[] = [];
 const persistenceScale = [0, .6, .7, .8, .9];
@@ -43,6 +51,10 @@ class Parameters {
     public static set autorun(ar: boolean) {
         autorun = ar;
         Checkbox.setChecked(ar);
+    }
+
+    public static get nextStepObservers(): (() => void)[] {
+        return nextStepObservers;
     }
 
     public static get scale(): number {

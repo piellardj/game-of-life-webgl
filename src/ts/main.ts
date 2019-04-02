@@ -35,11 +35,15 @@ function main() {
     }
     window.setInterval(updateIterationIndicator, 50);
 
+    let forceUpdate = false;
+    Parameters.nextStepObservers.push(() => forceUpdate = true);
+
     function mainLoop() {
         let updated = false;
-        if (Parameters.autorun) {
+        if (Parameters.autorun || forceUpdate) {
             automaton.update();
             updated = true;
+            forceUpdate = false;
         }
 
         if (updated || automaton.needToRedraw) {

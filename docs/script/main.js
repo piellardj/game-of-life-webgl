@@ -959,11 +959,14 @@ function main() {
         Canvas.setIndicatorText("Iteration", automaton.iteration);
     }
     window.setInterval(updateIterationIndicator, 50);
+    var forceUpdate = false;
+    parameters_1.default.nextStepObservers.push(function () { return forceUpdate = true; });
     function mainLoop() {
         var updated = false;
-        if (parameters_1.default.autorun) {
+        if (parameters_1.default.autorun || forceUpdate) {
             automaton.update();
             updated = true;
+            forceUpdate = false;
         }
         if (updated || automaton.needToRedraw) {
             fbo_1.default.bindDefault(gl_canvas_1.gl);
@@ -999,6 +1002,14 @@ Checkbox.addObserver(AUTORUN_CONTROL_ID, function (checked) {
     autorun = checked;
 });
 autorun = Checkbox.isChecked(AUTORUN_CONTROL_ID);
+var NEXT_STEP_CONTROL_ID = "next-button-id";
+var nextStepObservers = [];
+Button.addObserver(NEXT_STEP_CONTROL_ID, function () {
+    for (var _i = 0, nextStepObservers_1 = nextStepObservers; _i < nextStepObservers_1.length; _i++) {
+        var observer = nextStepObservers_1[_i];
+        observer();
+    }
+});
 var persistence;
 var persistenceObservers = [];
 var persistenceScale = [0, .6, .7, .8, .9];
@@ -1032,6 +1043,13 @@ var Parameters = (function () {
         set: function (ar) {
             autorun = ar;
             Checkbox.setChecked(ar);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Parameters, "nextStepObservers", {
+        get: function () {
+            return nextStepObservers;
         },
         enumerable: true,
         configurable: true
