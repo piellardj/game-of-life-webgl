@@ -42,6 +42,8 @@
           <canvas id="canvas"></canvas>
           <div class="loader"></div>
           <div id="indicators">
+            <span id="Iterations per second-indicator-id">Iterations per second:</span>
+            <br />
             <span id="Iteration-indicator-id">Iteration:</span>
             <br />
             <span id="Grid size-indicator-id">Grid size:</span>
@@ -62,6 +64,13 @@
                 <div class="checkbox">
                   <input type="checkbox" id="autorun-checkbox-id" checked>
                   <label for="autorun-checkbox-id" class="checkmark"></label>
+                </div>
+              </div>
+              <div class="control">
+                <label>Speed:</label>
+                <div class="range">
+                  <input type="range" min="1" max="6" value="6" step="1" class="slider" id="speed-range-id">
+                  <span class="tooltip"></span>
                 </div>
               </div>
               <div class="control">
@@ -90,6 +99,13 @@
                 <div class="range">
                   <input type="range" min="0" max="4" value="0" step="1" class="slider" id="persistence-range-id">
                   <span class="tooltip"></span>
+                </div>
+              </div>
+              <div class="control">
+                <label>Show indicators:</label>
+                <div class="checkbox">
+                  <input type="checkbox" id="indicators-checkbox-id" checked>
+                  <label for="indicators-checkbox-id" class="checkmark"></label>
                 </div>
               </div>
             </div>

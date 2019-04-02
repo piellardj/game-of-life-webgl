@@ -142,7 +142,7 @@ var Automaton2D = (function (_super) {
         _this._visibleSubTexture = [0, 0];
         initializeTexturesForCanvas();
         Canvas.Observers.canvasResize.push(initializeTexturesForCanvas);
-        Button.addObserver("reset-button-id", initializeTexturesForCanvas);
+        parameters_1.default.resetObservers.push(initializeTexturesForCanvas);
         parameters_1.default.scaleObservers.push(function () {
             _this._needToRedraw = true;
             _this._mustClear = true;
@@ -212,7 +212,6 @@ var Automaton2D = (function (_super) {
             shader.bindUniformsAndAttributes();
             gl_canvas_1.gl.enable(gl_canvas_1.gl.BLEND);
             gl_canvas_1.gl.drawArrays(gl_canvas_1.gl.TRIANGLE_STRIP, 0, 4);
-            Canvas.showLoader(false);
             this._needToRedraw = false;
             this._mustClear = false;
         }
@@ -955,20 +954,28 @@ function main() {
     parameters_1.default.scale = 1;
     parameters_1.default.persistence = 0;
     var automaton = new automaton_2D_1.default();
+    var lastIteration = automaton.iteration;
+    function updateIterationPerSecIndicator() {
+        Canvas.setIndicatorText("Iterations per second", automaton.iteration - lastIteration);
+        lastIteration = automaton.iteration;
+    }
+    window.setInterval(updateIterationPerSecIndicator, 1000);
     function updateIterationIndicator() {
         Canvas.setIndicatorText("Iteration", automaton.iteration);
     }
     window.setInterval(updateIterationIndicator, 50);
     var forceUpdate = false;
     parameters_1.default.nextStepObservers.push(function () { return forceUpdate = true; });
-    function mainLoop() {
-        var updated = false;
-        if (parameters_1.default.autorun || forceUpdate) {
+    var firstDraw = true;
+    var lastUpdate = 0;
+    function mainLoop(time) {
+        var update = forceUpdate || (parameters_1.default.autorun && (time - lastUpdate > parameters_1.default.updateWaitTime));
+        if (update) {
+            lastUpdate = time;
             automaton.update();
-            updated = true;
             forceUpdate = false;
         }
-        if (updated || automaton.needToRedraw) {
+        if (update || automaton.needToRedraw) {
             fbo_1.default.bindDefault(gl_canvas_1.gl);
             if (needToAdjustSize) {
                 GlCanvas.adjustSize();
@@ -976,6 +983,10 @@ function main() {
             }
             viewport_1.default.setFullCanvas(gl_canvas_1.gl);
             automaton.draw();
+            if (firstDraw) {
+                firstDraw = false;
+                Canvas.showLoader(false);
+            }
         }
         requestAnimationFrame(mainLoop);
     }
@@ -1002,11 +1013,26 @@ Checkbox.addObserver(AUTORUN_CONTROL_ID, function (checked) {
     autorun = checked;
 });
 autorun = Checkbox.isChecked(AUTORUN_CONTROL_ID);
+var speed;
+var updateWaitTime = [1000 / 1, 1000 / 2, 1000 / 5, 1000 / 11, 1000 / 31, 0];
+var SPEED_CONTROL_ID = "speed-range-id";
+Range.addObserver(SPEED_CONTROL_ID, function (newValue) {
+    speed = newValue;
+});
+speed = Range.getValue(SPEED_CONTROL_ID);
 var NEXT_STEP_CONTROL_ID = "next-button-id";
 var nextStepObservers = [];
 Button.addObserver(NEXT_STEP_CONTROL_ID, function () {
     for (var _i = 0, nextStepObservers_1 = nextStepObservers; _i < nextStepObservers_1.length; _i++) {
         var observer = nextStepObservers_1[_i];
+        observer();
+    }
+});
+var RESET_CONTROL_ID = "reset-button-id";
+var resetObservers = [];
+Button.addObserver(RESET_CONTROL_ID, function () {
+    for (var _i = 0, resetObservers_1 = resetObservers; _i < resetObservers_1.length; _i++) {
+        var observer = resetObservers_1[_i];
         observer();
     }
 });
@@ -1033,6 +1059,10 @@ Range.addObserver(SCALE_CONTROL_ID, function (newValue) {
     }
 });
 scale = Range.getValue(SCALE_CONTROL_ID);
+var INDICATORS_CONTROL_ID = "indicators-checkbox-id";
+Checkbox.addObserver(INDICATORS_CONTROL_ID, function (checked) {
+    Canvas.setIndicatorsVisibility(checked);
+});
 var Parameters = (function () {
     function Parameters() {
     }
@@ -1042,7 +1072,14 @@ var Parameters = (function () {
         },
         set: function (ar) {
             autorun = ar;
-            Checkbox.setChecked(ar);
+            Checkbox.setChecked(AUTORUN_CONTROL_ID, ar);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Parameters, "updateWaitTime", {
+        get: function () {
+            return updateWaitTime[speed - 1];
         },
         enumerable: true,
         configurable: true
@@ -1054,12 +1091,20 @@ var Parameters = (function () {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(Parameters, "resetObservers", {
+        get: function () {
+            return resetObservers;
+        },
+        enumerable: true,
+        configurable: true
+    });
     Object.defineProperty(Parameters, "scale", {
         get: function () {
             return scale;
         },
         set: function (newValue) {
             Range.setValue(SCALE_CONTROL_ID, newValue);
+            scale = Range.getValue(SCALE_CONTROL_ID);
         },
         enumerable: true,
         configurable: true
@@ -1077,6 +1122,7 @@ var Parameters = (function () {
         },
         set: function (newValue) {
             Range.setValue(PERSISTENCE_CONTROL_ID, newValue);
+            persistence = Range.getValue(PERSISTENCE_CONTROL_ID);
         },
         enumerable: true,
         configurable: true

@@ -30,6 +30,13 @@ function main() {
 
     const automaton = new Automaton2D();
 
+    let lastIteration = automaton.iteration;
+    function updateIterationPerSecIndicator() {
+        Canvas.setIndicatorText("Iterations per second", automaton.iteration - lastIteration);
+        lastIteration = automaton.iteration;
+    }
+    window.setInterval(updateIterationPerSecIndicator, 1000);
+
     function updateIterationIndicator() {
         Canvas.setIndicatorText("Iteration", automaton.iteration);
     }
@@ -38,15 +45,17 @@ function main() {
     let forceUpdate = false;
     Parameters.nextStepObservers.push(() => forceUpdate = true);
 
-    function mainLoop() {
-        let updated = false;
-        if (Parameters.autorun || forceUpdate) {
+    let firstDraw = true;
+    let lastUpdate = 0;
+    function mainLoop(time: number) {
+        const update = forceUpdate || (Parameters.autorun && (time - lastUpdate > Parameters.updateWaitTime));
+        if (update) {
+            lastUpdate = time;
             automaton.update();
-            updated = true;
             forceUpdate = false;
         }
 
-        if (updated || automaton.needToRedraw) {
+        if (update || automaton.needToRedraw) {
             FBO.bindDefault(gl);
 
             if (needToAdjustSize) {
@@ -57,6 +66,12 @@ function main() {
             Viewport.setFullCanvas(gl);
 
             automaton.draw();
+
+            if (firstDraw) {
+                firstDraw = false;
+
+                Canvas.showLoader(false);
+            }
         }
 
         requestAnimationFrame(mainLoop);

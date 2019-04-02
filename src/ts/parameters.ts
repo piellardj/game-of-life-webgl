@@ -1,7 +1,9 @@
 declare const Button: any;
+declare const Canvas: any;
 declare const Checkbox: any;
 declare const Range: any;
 
+type ButtonObserver = () => void;
 type RangeObserver = (newValue: number) => void;
 
 let autorun: boolean;
@@ -11,10 +13,26 @@ Checkbox.addObserver(AUTORUN_CONTROL_ID, (checked: boolean) => {
 });
 autorun = Checkbox.isChecked(AUTORUN_CONTROL_ID);
 
+let speed: number;
+const updateWaitTime = [1000 / 1, 1000 / 2, 1000 / 5, 1000 / 11, 1000 / 31, 0]; // iterations per second
+const SPEED_CONTROL_ID = "speed-range-id";
+Range.addObserver(SPEED_CONTROL_ID, (newValue: number) => {
+    speed = newValue;
+});
+speed = Range.getValue(SPEED_CONTROL_ID);
+
 const NEXT_STEP_CONTROL_ID = "next-button-id";
-const nextStepObservers: (() => void)[] = [];
+const nextStepObservers: ButtonObserver[] = [];
 Button.addObserver(NEXT_STEP_CONTROL_ID,  () => {
     for (const observer of nextStepObservers) {
+        observer();
+    }
+});
+
+const RESET_CONTROL_ID = "reset-button-id";
+const resetObservers: ButtonObserver[] = [];
+Button.addObserver(RESET_CONTROL_ID,  () => {
+    for (const observer of resetObservers) {
         observer();
     }
 });
@@ -44,17 +62,30 @@ Range.addObserver(SCALE_CONTROL_ID, (newValue: number) => {
 });
 scale = Range.getValue(SCALE_CONTROL_ID);
 
+const INDICATORS_CONTROL_ID = "indicators-checkbox-id";
+Checkbox.addObserver(INDICATORS_CONTROL_ID, (checked: boolean) => {
+    Canvas.setIndicatorsVisibility(checked);
+});
+
 class Parameters {
     public static get autorun(): boolean {
         return autorun;
     }
     public static set autorun(ar: boolean) {
         autorun = ar;
-        Checkbox.setChecked(ar);
+        Checkbox.setChecked(AUTORUN_CONTROL_ID, ar);
     }
 
-    public static get nextStepObservers(): (() => void)[] {
+    public static get updateWaitTime(): number {
+        return updateWaitTime[speed - 1];
+    }
+
+    public static get nextStepObservers(): ButtonObserver[] {
         return nextStepObservers;
+    }
+
+    public static get resetObservers(): ButtonObserver[] {
+        return resetObservers;
     }
 
     public static get scale(): number {
@@ -62,6 +93,7 @@ class Parameters {
     }
     public static set scale(newValue: number) {
         Range.setValue(SCALE_CONTROL_ID, newValue);
+        scale = Range.getValue(SCALE_CONTROL_ID);
     }
     public static get scaleObservers(): RangeObserver[] {
         return scaleObservers;
@@ -72,6 +104,7 @@ class Parameters {
     }
     public static set persistence(newValue: number) {
         Range.setValue(PERSISTENCE_CONTROL_ID, newValue);
+        persistence = Range.getValue(PERSISTENCE_CONTROL_ID);
     }
     public static get persistenceObservers(): RangeObserver[] {
         return persistenceObservers;

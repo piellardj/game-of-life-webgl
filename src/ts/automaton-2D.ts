@@ -7,7 +7,6 @@ import VBO from "./gl-utils/vbo";
 
 import Parameters from "./parameters";
 
-declare const Button: any;
 declare const Canvas: any;
 
 class Automaton2D extends GLResource {
@@ -48,7 +47,7 @@ class Automaton2D extends GLResource {
         initializeTexturesForCanvas();
 
         Canvas.Observers.canvasResize.push(initializeTexturesForCanvas);
-        Button.addObserver("reset-button-id", initializeTexturesForCanvas);
+        Parameters.resetObservers.push(initializeTexturesForCanvas);
         Parameters.scaleObservers.push(() => {
             this._needToRedraw = true;
             this._mustClear = true;
@@ -148,7 +147,6 @@ class Automaton2D extends GLResource {
             gl.enable(gl.BLEND);
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
-            Canvas.showLoader(false);
             this._needToRedraw = false;
             this._mustClear = false;
         }
