@@ -278,7 +278,8 @@ const Canvas = (function() {
 
         canvas.addEventListener("wheel", function(event) {
             if (mouseWheelObservers.length > 0) {
-                callObservers(mouseWheelObservers, (event.deltaY > 0) ? 1 : -1);
+                const delta = (event.deltaY > 0) ? 1 : -1;
+                callObservers(mouseWheelObservers, delta, lastMousePosition);
                 event.preventDefault();
                 return false;
             }
@@ -385,7 +386,12 @@ const Canvas = (function() {
                 const zoomFactor = dDistance / currentDistance;
                 currentDistance = newDistance;
 
-                callObservers(mouseWheelObservers, 5 * zoomFactor);
+                const zoomCenter = clientToRelative(
+                    0.5 * (currentTouches[0].clientX +
+                        currentTouches[1].clientX),
+                    0.5 * (currentTouches[0].clientY +
+                        currentTouches[1].clientY));
+                callObservers(mouseWheelObservers, 5 * zoomFactor, zoomCenter);
             }
         }, {passive: false});
     }

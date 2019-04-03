@@ -134,18 +134,29 @@ var Automaton2D = (function (_super) {
         var initializeTexturesForCanvas = function () {
             var canvasSize = Canvas.getSize();
             _this.initializeTextures(canvasSize[0], canvasSize[1]);
-            _this._visibleSubTexture[0] = canvasSize[0] / _this._textureSize[0];
-            _this._visibleSubTexture[1] = canvasSize[1] / _this._textureSize[1];
+            _this.recomputeVisibleSubTexture();
         };
         _this._mustClear = true;
         _this._textures = [null, null];
-        _this._visibleSubTexture = [0, 0];
+        _this._visibleSubTexture = [0, 0, 1, 1];
         initializeTexturesForCanvas();
-        Canvas.Observers.canvasResize.push(initializeTexturesForCanvas);
-        parameters_1.default.resetObservers.push(initializeTexturesForCanvas);
-        parameters_1.default.scaleObservers.push(function () {
+        Canvas.Observers.mouseDrag.push(function (dX, dY) {
+            _this._visibleSubTexture[0] -= dX * _this._visibleSubTexture[2];
+            _this._visibleSubTexture[1] -= dY * _this._visibleSubTexture[3];
+            _this.recomputeVisibleSubTexture();
             _this._needToRedraw = true;
             _this._mustClear = true;
+        });
+        Canvas.Observers.canvasResize.push(initializeTexturesForCanvas);
+        parameters_1.default.resetObservers.push(initializeTexturesForCanvas);
+        var previousScale = parameters_1.default.scale;
+        parameters_1.default.scaleObservers.push(function (newScale, zoomCenter) {
+            _this._needToRedraw = true;
+            _this._mustClear = true;
+            _this._visibleSubTexture[0] += zoomCenter[0] * (1 - previousScale / newScale) * _this._visibleSubTexture[2];
+            _this._visibleSubTexture[1] += zoomCenter[1] * (1 - previousScale / newScale) * _this._visibleSubTexture[3];
+            previousScale = newScale;
+            _this.recomputeVisibleSubTexture();
         });
         ShaderManager.buildShader({
             fragmentFilename: "display-2D.frag",
@@ -205,7 +216,6 @@ var Automaton2D = (function (_super) {
     Automaton2D.prototype.draw = function () {
         var shader = this._displayShader;
         if (shader) {
-            shader.u["uScale"].value = parameters_1.default.scale;
             shader.u["uClearFactor"].value = (this._mustClear) ? 1 : 1 - parameters_1.default.persistence;
             shader.u["uTexture"].value = this._textures[this._currentIndex];
             shader.use();
@@ -230,6 +240,15 @@ var Automaton2D = (function (_super) {
         enumerable: true,
         configurable: true
     });
+    Automaton2D.prototype.recomputeVisibleSubTexture = function () {
+        var canvasSize = Canvas.getSize();
+        this._visibleSubTexture[2] = canvasSize[0] / this._textureSize[0] / parameters_1.default.scale;
+        this._visibleSubTexture[3] = canvasSize[1] / this._textureSize[1] / parameters_1.default.scale;
+        for (var i = 0; i < 2; ++i) {
+            this._visibleSubTexture[i] -= Math.min(0, this._visibleSubTexture[i]);
+            this._visibleSubTexture[i] -= Math.max(0, this._visibleSubTexture[i] + this._visibleSubTexture[i + 2] - 1);
+        }
+    };
     Automaton2D.prototype.freeTextures = function () {
         for (var i = 0; i < 2; ++i) {
             if (this._textures[i]) {
@@ -951,7 +970,6 @@ function main() {
     var needToAdjustSize = true;
     Canvas.Observers.canvasResize.push(function () { return needToAdjustSize = true; });
     parameters_1.default.autorun = true;
-    parameters_1.default.scale = 1;
     parameters_1.default.persistence = 0;
     var automaton = new automaton_2D_1.default();
     var lastIteration = automaton.iteration;
@@ -1049,16 +1067,23 @@ Range.addObserver(PERSISTENCE_CONTROL_ID, function (newValue) {
 });
 persistence = Range.getValue(PERSISTENCE_CONTROL_ID);
 var scale;
+var MIN_SCALE = 1;
+var MAX_SCALE = 10;
 var scaleObservers = [];
-var SCALE_CONTROL_ID = "scale-range-id";
-Range.addObserver(SCALE_CONTROL_ID, function (newValue) {
-    scale = newValue;
-    for (var _i = 0, scaleObservers_1 = scaleObservers; _i < scaleObservers_1.length; _i++) {
-        var observer = scaleObservers_1[_i];
-        observer(scale);
+Canvas.Observers.mouseWheel.push(function (delta, zoomCenter) {
+    var newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale - 0.7 * delta));
+    if (newScale !== scale) {
+        scale = newScale;
+        if (!zoomCenter) {
+            zoomCenter = Canvas.getMousePosition();
+        }
+        for (var _i = 0, scaleObservers_1 = scaleObservers; _i < scaleObservers_1.length; _i++) {
+            var observer = scaleObservers_1[_i];
+            observer(scale, zoomCenter);
+        }
     }
 });
-scale = Range.getValue(SCALE_CONTROL_ID);
+scale = MIN_SCALE;
 var INDICATORS_CONTROL_ID = "indicators-checkbox-id";
 Checkbox.addObserver(INDICATORS_CONTROL_ID, function (checked) {
     Canvas.setIndicatorsVisibility(checked);
@@ -1101,10 +1126,6 @@ var Parameters = (function () {
     Object.defineProperty(Parameters, "scale", {
         get: function () {
             return scale;
-        },
-        set: function (newValue) {
-            Range.setValue(SCALE_CONTROL_ID, newValue);
-            scale = Range.getValue(SCALE_CONTROL_ID);
         },
         enumerable: true,
         configurable: true

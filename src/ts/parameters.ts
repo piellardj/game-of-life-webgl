@@ -51,16 +51,26 @@ Range.addObserver(PERSISTENCE_CONTROL_ID, (newValue: number) => {
 persistence = Range.getValue(PERSISTENCE_CONTROL_ID);
 
 let scale: number;
-const scaleObservers: RangeObserver[] = [];
-const SCALE_CONTROL_ID = "scale-range-id";
-Range.addObserver(SCALE_CONTROL_ID, (newValue: number) => {
-    scale = newValue;
+const MIN_SCALE = 1;
+const MAX_SCALE = 10;
+type ScaleObserver = (newScale: number, zoomCenter: number[]) => void;
+const scaleObservers: ScaleObserver[] = [];
+Canvas.Observers.mouseWheel.push((delta: number, zoomCenter: number[]) => {
+    const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE,  scale - 0.7 * delta));
 
-    for (const observer of scaleObservers) {
-        observer(scale);
+    if (newScale !== scale) {
+        scale = newScale;
+
+        if (!zoomCenter) {
+            zoomCenter = Canvas.getMousePosition();
+        }
+
+        for (const observer of scaleObservers) {
+            observer(scale, zoomCenter);
+        }
     }
 });
-scale = Range.getValue(SCALE_CONTROL_ID);
+scale = MIN_SCALE;
 
 const INDICATORS_CONTROL_ID = "indicators-checkbox-id";
 Checkbox.addObserver(INDICATORS_CONTROL_ID, (checked: boolean) => {
@@ -91,11 +101,7 @@ class Parameters {
     public static get scale(): number {
         return scale;
     }
-    public static set scale(newValue: number) {
-        Range.setValue(SCALE_CONTROL_ID, newValue);
-        scale = Range.getValue(SCALE_CONTROL_ID);
-    }
-    public static get scaleObservers(): RangeObserver[] {
+    public static get scaleObservers(): ScaleObserver[] {
         return scaleObservers;
     }
 

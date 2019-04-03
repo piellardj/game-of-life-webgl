@@ -25,7 +25,6 @@ function main() {
     Canvas.Observers.canvasResize.push(() => needToAdjustSize = true);
 
     Parameters.autorun = true;
-    Parameters.scale = 1;
     Parameters.persistence = 0;
 
     const automaton = new Automaton2D();

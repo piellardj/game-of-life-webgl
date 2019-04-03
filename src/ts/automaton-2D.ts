@@ -35,22 +35,36 @@ class Automaton2D extends GLResource {
         const initializeTexturesForCanvas = () => {
             const canvasSize = Canvas.getSize();
             this.initializeTextures(canvasSize[0], canvasSize[1]);
-
-            this._visibleSubTexture[0] = canvasSize[0] / this._textureSize[0];
-            this._visibleSubTexture[1] = canvasSize[1] / this._textureSize[1];
+            this.recomputeVisibleSubTexture();
         };
 
         this._mustClear = true;
 
         this._textures = [null, null];
-        this._visibleSubTexture = [0, 0];
+        this._visibleSubTexture = [0, 0, 1, 1];
         initializeTexturesForCanvas();
+
+        Canvas.Observers.mouseDrag.push((dX: number, dY: number) => {
+            this._visibleSubTexture[0] -= dX * this._visibleSubTexture[2];
+            this._visibleSubTexture[1] -= dY * this._visibleSubTexture[3];
+            this.recomputeVisibleSubTexture();
+            this._needToRedraw = true;
+            this._mustClear = true;
+        });
 
         Canvas.Observers.canvasResize.push(initializeTexturesForCanvas);
         Parameters.resetObservers.push(initializeTexturesForCanvas);
-        Parameters.scaleObservers.push(() => {
+
+        let previousScale = Parameters.scale;
+        Parameters.scaleObservers.push((newScale: number, zoomCenter: number[]) => {
             this._needToRedraw = true;
             this._mustClear = true;
+
+            this._visibleSubTexture[0] += zoomCenter[0] * (1 - previousScale / newScale) * this._visibleSubTexture[2];
+            this._visibleSubTexture[1] += zoomCenter[1] * (1- previousScale / newScale) * this._visibleSubTexture[3];
+
+            previousScale = newScale;
+            this.recomputeVisibleSubTexture();
         });
 
         ShaderManager.buildShader(
@@ -136,7 +150,6 @@ class Automaton2D extends GLResource {
 
         if (shader) {
             /* tslint:disable:no-string-literal */
-            shader.u["uScale"].value = Parameters.scale;
             shader.u["uClearFactor"].value = (this._mustClear) ? 1 : 1 - Parameters.persistence;
             shader.u["uTexture"].value = this._textures[this._currentIndex];
             /* tslint:enable:no-string-literal */
@@ -158,6 +171,17 @@ class Automaton2D extends GLResource {
 
     public get needToRedraw(): boolean {
         return this._needToRedraw;
+    }
+
+    private recomputeVisibleSubTexture(): void {
+        const canvasSize = Canvas.getSize();
+        this._visibleSubTexture[2] = canvasSize[0] / this._textureSize[0] / Parameters.scale;
+        this._visibleSubTexture[3] = canvasSize[1] / this._textureSize[1] / Parameters.scale;
+
+        for (let i = 0; i < 2; ++i) {
+            this._visibleSubTexture[i] -= Math.min(0, this._visibleSubTexture[i]);
+            this._visibleSubTexture[i] -= Math.max(0, this._visibleSubTexture[i] + this._visibleSubTexture[i+2] - 1);
+        }
     }
 
     private freeTextures(): void {
