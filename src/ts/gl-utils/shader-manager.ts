@@ -7,6 +7,7 @@ type RegisterCallback = (success: boolean, shader: Shader | null) => void;
 interface IShaderInfos {
     fragmentFilename: string;
     vertexFilename: string;
+    injected: { [id: string]: string };
 }
 
 interface ICachedShader {
@@ -30,6 +31,15 @@ function buildShader(infos: IShaderInfos, callback: BuildCallback) {
     let sourcesFailed = 0;
 
     function loadedSource(success: boolean) {
+        function processSource(source: string): string {
+            return source.replace(/#INJECT\((.*)\)/mg, (match, name) => {
+                if (infos.injected[name]) {
+                    return infos.injected[name];
+                }
+                return match;
+            });
+        }
+
         sourcesPending--;
         if (!success) {
             sourcesFailed++;
@@ -41,7 +51,11 @@ function buildShader(infos: IShaderInfos, callback: BuildCallback) {
             if (sourcesFailed === 0) {
                 const vert = ShaderSources.getSource(infos.vertexFilename);
                 const frag = ShaderSources.getSource(infos.fragmentFilename);
-                shader = new Shader(gl, vert, frag);
+
+                const processedVert = processSource(vert);
+                const processedFrag = processSource(frag);
+
+                shader = new Shader(gl, processedVert, processedFrag);
             }
 
             callback(shader);

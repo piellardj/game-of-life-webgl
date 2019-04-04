@@ -2,6 +2,62 @@ declare const Button: any;
 declare const Canvas: any;
 declare const Checkbox: any;
 declare const Range: any;
+declare const Tabs: any;
+
+enum Rule {
+    DEATH = "death",
+    ALIVE = "alive",
+    BIRTH = "birth",
+}
+
+const rules: Rule[] = [
+    Rule.DEATH,
+    Rule.DEATH,
+    Rule.ALIVE,
+    Rule.BIRTH,
+    Rule.DEATH,
+    Rule.DEATH,
+    Rule.DEATH,
+    Rule.DEATH,
+    Rule.DEATH,
+];
+
+function updateRuleControl(id: number) {
+    if (rules[id] === Rule.DEATH) {
+        Tabs.setValues("neighbours-tabs-" + id, ["death"]);
+    } else if (rules[id] === Rule.ALIVE) {
+        Tabs.setValues("neighbours-tabs-" + id, ["alive"]);
+    } else if (rules[id] === Rule.BIRTH) {
+        Tabs.setValues("neighbours-tabs-" + id, ["alive", "birth"]);
+    }
+}
+for (let i = 0; i < 9; ++i) {
+    updateRuleControl(i);
+}
+
+const rulesObservers: Array<() => void> = [];
+
+window.addEventListener("load", () => {
+    for (let i = 0; i < 9; ++i) {
+        Tabs.addObserver("neighbours-tabs-" + i, (values) => {
+            const previous = rules[i];
+
+            if (rules[i] !== Rule.DEATH && values.includes(Rule.DEATH)) {
+                rules[i] = Rule.DEATH;
+            } else if (rules[i] !== Rule.ALIVE && values.includes(Rule.ALIVE)) {
+                rules[i] = Rule.ALIVE;
+            } else if (rules[i] !== Rule.BIRTH && values.includes(Rule.BIRTH)) {
+                rules[i] = Rule.BIRTH;
+            }
+
+            updateRuleControl(i);
+
+            if (previous !== rules[i]) {
+                rulesObservers.forEach((callback) => callback());
+            }
+        });
+    }
+});
 
 type ButtonObserver = () => void;
 type RangeObserver = (newValue: number) => void;
@@ -56,7 +112,7 @@ const MAX_SCALE = 10;
 type ScaleObserver = (newScale: number, zoomCenter: number[]) => void;
 const scaleObservers: ScaleObserver[] = [];
 Canvas.Observers.mouseWheel.push((delta: number, zoomCenter: number[]) => {
-    const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE,  scale - 0.7 * delta));
+    const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE,  scale - delta));
 
     if (newScale !== scale) {
         scale = newScale;
@@ -114,6 +170,13 @@ class Parameters {
     }
     public static get persistenceObservers(): RangeObserver[] {
         return persistenceObservers;
+    }
+
+    public static get rules(): Rule[] {
+        return rules;
+    }
+    public static get rulesObservers(): Array<() => void> {
+        return rulesObservers;
     }
 
     private constructor() {}

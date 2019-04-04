@@ -23,6 +23,7 @@ class Automaton2D extends GLResource {
 
     private _iteration: number;
 
+    private _needToRecomputeShader: boolean;
     private  _needToRedraw: boolean;
     private  _mustClear: boolean;
 
@@ -38,6 +39,7 @@ class Automaton2D extends GLResource {
             this.recomputeVisibleSubTexture();
         };
 
+        this._needToRecomputeShader = true;
         this._mustClear = true;
 
         this._textures = [null, null];
@@ -54,6 +56,7 @@ class Automaton2D extends GLResource {
 
         Canvas.Observers.canvasResize.push(initializeTexturesForCanvas);
         Parameters.resetObservers.push(initializeTexturesForCanvas);
+        Parameters.rulesObservers.push(() => this._needToRecomputeShader = true );
 
         let previousScale = Parameters.scale;
         Parameters.scaleObservers.push((newScale: number, zoomCenter: number[]) => {
@@ -61,7 +64,7 @@ class Automaton2D extends GLResource {
             this._mustClear = true;
 
             this._visibleSubTexture[0] += zoomCenter[0] * (1 - previousScale / newScale) * this._visibleSubTexture[2];
-            this._visibleSubTexture[1] += zoomCenter[1] * (1- previousScale / newScale) * this._visibleSubTexture[3];
+            this._visibleSubTexture[1] += zoomCenter[1] * (1 - previousScale / newScale) * this._visibleSubTexture[3];
 
             previousScale = newScale;
             this.recomputeVisibleSubTexture();
@@ -71,6 +74,7 @@ class Automaton2D extends GLResource {
             {
                 fragmentFilename: "display-2D.frag",
                 vertexFilename: "display-2D.vert",
+                injected: {},
             },
             (shader) => {
                 if (shader !== null) {
@@ -80,21 +84,8 @@ class Automaton2D extends GLResource {
                     this._displayShader.u["uSubTexture"].value = this._visibleSubTexture;
                     /* tslint:enable:no-string-literal */
                 }
-            });
-
-        ShaderManager.buildShader(
-            {
-                fragmentFilename: "update-2D.frag",
-                vertexFilename: "fullscreen.vert",
             },
-            (shader) => {
-                if (shader !== null) {
-                    /* tslint:disable:no-string-literal */
-                    this._updateShader = shader;
-                    this._updateShader.a["aCorner"].VBO = this._vbo;
-                    /* tslint:enable:no-string-literal */
-                }
-            });
+        );
     }
 
     public freeGLResources(): void {
@@ -121,6 +112,10 @@ class Automaton2D extends GLResource {
     }
 
     public update(): void {
+        if (this._needToRecomputeShader) {
+            this.recomputeUpdateShader();
+        }
+
         const shader = this._updateShader;
 
         if (shader) {
@@ -173,6 +168,72 @@ class Automaton2D extends GLResource {
         return this._needToRedraw;
     }
 
+    public get needToUpdate(): boolean {
+        return this._needToRecomputeShader;
+    }
+
+    private recomputeUpdateShader(): void {
+        ShaderManager.buildShader(
+            {
+                fragmentFilename: "update-2D.frag",
+                vertexFilename: "fullscreen.vert",
+                injected: { rules: this.generateShaderRules() },
+            },
+            (shader) => {
+                if (shader !== null) {
+                    if (this._updateShader) {
+                        this._updateShader.freeGLResources();
+                    }
+
+                    /* tslint:disable:no-string-literal */
+                    this._updateShader = shader;
+                    this._updateShader.a["aCorner"].VBO = this._vbo;
+                    /* tslint:enable:no-string-literal */
+                }
+            },
+        );
+        this._needToRecomputeShader = false;
+    }
+
+    private generateShaderRules(): string {
+        function generateRuleBlock(starting: number, ending: number, rule: string) {
+            if (rule !== "alive") {
+                const operation = (rule === "death") ? " -= " : " += ";
+                let rangeCheck;
+                if (starting === 0) {
+                    rangeCheck = "step(N, " + (ending + .5) + ");";
+
+                    if (ending === 8) {
+                        rangeCheck = "1";
+                    }
+                } else if (ending === 8) {
+                    rangeCheck = "step(" + (starting - .5) + ", N);";
+                } else {
+                    rangeCheck = "step(" + (starting - .5) + ", N) * step(N, " + (ending + .5) + ");";
+                }
+
+                return "currentState" + operation + rangeCheck + "\n";
+            }
+            return "";
+        }
+
+        let result = "";
+
+        const rules = Parameters.rules;
+        let currentRule = rules[0];
+        let from = 0;
+        for (let i = 1; i < 9; ++i) {
+            if (rules[i] !== currentRule) {
+                result += generateRuleBlock(from, i - 1, currentRule);
+                currentRule = rules[i];
+                from = i;
+            }
+        }
+        result += generateRuleBlock(from, 8, currentRule);
+
+        return result;
+    }
+
     private recomputeVisibleSubTexture(): void {
         const canvasSize = Canvas.getSize();
         this._visibleSubTexture[2] = canvasSize[0] / this._textureSize[0] / Parameters.scale;
@@ -180,7 +241,7 @@ class Automaton2D extends GLResource {
 
         for (let i = 0; i < 2; ++i) {
             this._visibleSubTexture[i] -= Math.min(0, this._visibleSubTexture[i]);
-            this._visibleSubTexture[i] -= Math.max(0, this._visibleSubTexture[i] + this._visibleSubTexture[i+2] - 1);
+            this._visibleSubTexture[i] -= Math.max(0, this._visibleSubTexture[i] + this._visibleSubTexture[i + 2] - 1);
         }
     }
 

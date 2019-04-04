@@ -59,6 +59,7 @@ function loadSource(filename: string, callback: LoadCallback) {
         if (cached.pending === true) {
             cached.callbacks.push(callback);
         } else {
+            cached.callbacks = [callback];
             callAndClearCallbacks(cached);
         }
     }

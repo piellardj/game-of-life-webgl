@@ -136,6 +136,7 @@ var Automaton2D = (function (_super) {
             _this.initializeTextures(canvasSize[0], canvasSize[1]);
             _this.recomputeVisibleSubTexture();
         };
+        _this._needToRecomputeShader = true;
         _this._mustClear = true;
         _this._textures = [null, null];
         _this._visibleSubTexture = [0, 0, 1, 1];
@@ -149,6 +150,7 @@ var Automaton2D = (function (_super) {
         });
         Canvas.Observers.canvasResize.push(initializeTexturesForCanvas);
         parameters_1.default.resetObservers.push(initializeTexturesForCanvas);
+        parameters_1.default.rulesObservers.push(function () { return _this._needToRecomputeShader = true; });
         var previousScale = parameters_1.default.scale;
         parameters_1.default.scaleObservers.push(function (newScale, zoomCenter) {
             _this._needToRedraw = true;
@@ -161,20 +163,12 @@ var Automaton2D = (function (_super) {
         ShaderManager.buildShader({
             fragmentFilename: "display-2D.frag",
             vertexFilename: "display-2D.vert",
+            injected: {},
         }, function (shader) {
             if (shader !== null) {
                 _this._displayShader = shader;
                 _this._displayShader.a["aCorner"].VBO = _this._vbo;
                 _this._displayShader.u["uSubTexture"].value = _this._visibleSubTexture;
-            }
-        });
-        ShaderManager.buildShader({
-            fragmentFilename: "update-2D.frag",
-            vertexFilename: "fullscreen.vert",
-        }, function (shader) {
-            if (shader !== null) {
-                _this._updateShader = shader;
-                _this._updateShader.a["aCorner"].VBO = _this._vbo;
             }
         });
         return _this;
@@ -198,6 +192,9 @@ var Automaton2D = (function (_super) {
         this.freeTextures();
     };
     Automaton2D.prototype.update = function () {
+        if (this._needToRecomputeShader) {
+            this.recomputeUpdateShader();
+        }
         var shader = this._updateShader;
         if (shader) {
             var current = this._textures[this._currentIndex];
@@ -240,6 +237,65 @@ var Automaton2D = (function (_super) {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(Automaton2D.prototype, "needToUpdate", {
+        get: function () {
+            return this._needToRecomputeShader;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Automaton2D.prototype.recomputeUpdateShader = function () {
+        var _this = this;
+        ShaderManager.buildShader({
+            fragmentFilename: "update-2D.frag",
+            vertexFilename: "fullscreen.vert",
+            injected: { rules: this.generateShaderRules() },
+        }, function (shader) {
+            if (shader !== null) {
+                if (_this._updateShader) {
+                    _this._updateShader.freeGLResources();
+                }
+                _this._updateShader = shader;
+                _this._updateShader.a["aCorner"].VBO = _this._vbo;
+            }
+        });
+        this._needToRecomputeShader = false;
+    };
+    Automaton2D.prototype.generateShaderRules = function () {
+        function generateRuleBlock(starting, ending, rule) {
+            if (rule !== "alive") {
+                var operation = (rule === "death") ? " -= " : " += ";
+                var rangeCheck = void 0;
+                if (starting === 0) {
+                    rangeCheck = "step(N, " + (ending + .5) + ");";
+                    if (ending === 8) {
+                        rangeCheck = "1";
+                    }
+                }
+                else if (ending === 8) {
+                    rangeCheck = "step(" + (starting - .5) + ", N);";
+                }
+                else {
+                    rangeCheck = "step(" + (starting - .5) + ", N) * step(N, " + (ending + .5) + ");";
+                }
+                return "currentState" + operation + rangeCheck + "\n";
+            }
+            return "";
+        }
+        var result = "";
+        var rules = parameters_1.default.rules;
+        var currentRule = rules[0];
+        var from = 0;
+        for (var i = 1; i < 9; ++i) {
+            if (rules[i] !== currentRule) {
+                result += generateRuleBlock(from, i - 1, currentRule);
+                currentRule = rules[i];
+                from = i;
+            }
+        }
+        result += generateRuleBlock(from, 8, currentRule);
+        return result;
+    };
     Automaton2D.prototype.recomputeVisibleSubTexture = function () {
         var canvasSize = Canvas.getSize();
         this._visibleSubTexture[2] = canvasSize[0] / this._textureSize[0] / parameters_1.default.scale;
@@ -469,6 +525,14 @@ function buildShader(infos, callback) {
     var sourcesPending = 2;
     var sourcesFailed = 0;
     function loadedSource(success) {
+        function processSource(source) {
+            return source.replace(/#INJECT\((.*)\)/mg, function (match, name) {
+                if (infos.injected[name]) {
+                    return infos.injected[name];
+                }
+                return match;
+            });
+        }
         sourcesPending--;
         if (!success) {
             sourcesFailed++;
@@ -478,7 +542,9 @@ function buildShader(infos, callback) {
             if (sourcesFailed === 0) {
                 var vert = ShaderSources.getSource(infos.vertexFilename);
                 var frag = ShaderSources.getSource(infos.fragmentFilename);
-                shader = new shader_1.default(gl_canvas_1.gl, vert, frag);
+                var processedVert = processSource(vert);
+                var processedFrag = processSource(frag);
+                shader = new shader_1.default(gl_canvas_1.gl, processedVert, processedFrag);
             }
             callback(shader);
         }
@@ -592,6 +658,7 @@ function loadSource(filename, callback) {
             cached.callbacks.push(callback);
         }
         else {
+            cached.callbacks = [callback];
             callAndClearCallbacks(cached);
         }
     }
@@ -987,7 +1054,8 @@ function main() {
     var firstDraw = true;
     var lastUpdate = 0;
     function mainLoop(time) {
-        var update = forceUpdate || (parameters_1.default.autorun && (time - lastUpdate > parameters_1.default.updateWaitTime));
+        var update = automaton.needToUpdate || forceUpdate ||
+            (parameters_1.default.autorun && (time - lastUpdate > parameters_1.default.updateWaitTime));
         if (update) {
             lastUpdate = time;
             automaton.update();
@@ -1025,6 +1093,61 @@ main();
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+var Rule;
+(function (Rule) {
+    Rule["DEATH"] = "death";
+    Rule["ALIVE"] = "alive";
+    Rule["BIRTH"] = "birth";
+})(Rule || (Rule = {}));
+var rules = [
+    Rule.DEATH,
+    Rule.DEATH,
+    Rule.ALIVE,
+    Rule.BIRTH,
+    Rule.DEATH,
+    Rule.DEATH,
+    Rule.DEATH,
+    Rule.DEATH,
+    Rule.DEATH,
+];
+function updateRuleControl(id) {
+    if (rules[id] === Rule.DEATH) {
+        Tabs.setValues("neighbours-tabs-" + id, ["death"]);
+    }
+    else if (rules[id] === Rule.ALIVE) {
+        Tabs.setValues("neighbours-tabs-" + id, ["alive"]);
+    }
+    else if (rules[id] === Rule.BIRTH) {
+        Tabs.setValues("neighbours-tabs-" + id, ["alive", "birth"]);
+    }
+}
+for (var i = 0; i < 9; ++i) {
+    updateRuleControl(i);
+}
+var rulesObservers = [];
+window.addEventListener("load", function () {
+    var _loop_1 = function (i) {
+        Tabs.addObserver("neighbours-tabs-" + i, function (values) {
+            var previous = rules[i];
+            if (rules[i] !== Rule.DEATH && values.includes(Rule.DEATH)) {
+                rules[i] = Rule.DEATH;
+            }
+            else if (rules[i] !== Rule.ALIVE && values.includes(Rule.ALIVE)) {
+                rules[i] = Rule.ALIVE;
+            }
+            else if (rules[i] !== Rule.BIRTH && values.includes(Rule.BIRTH)) {
+                rules[i] = Rule.BIRTH;
+            }
+            updateRuleControl(i);
+            if (previous !== rules[i]) {
+                rulesObservers.forEach(function (callback) { return callback(); });
+            }
+        });
+    };
+    for (var i = 0; i < 9; ++i) {
+        _loop_1(i);
+    }
+});
 var autorun;
 var AUTORUN_CONTROL_ID = "autorun-checkbox-id";
 Checkbox.addObserver(AUTORUN_CONTROL_ID, function (checked) {
@@ -1071,7 +1194,7 @@ var MIN_SCALE = 1;
 var MAX_SCALE = 10;
 var scaleObservers = [];
 Canvas.Observers.mouseWheel.push(function (delta, zoomCenter) {
-    var newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale - 0.7 * delta));
+    var newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale - delta));
     if (newScale !== scale) {
         scale = newScale;
         if (!zoomCenter) {
@@ -1151,6 +1274,20 @@ var Parameters = (function () {
     Object.defineProperty(Parameters, "persistenceObservers", {
         get: function () {
             return persistenceObservers;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Parameters, "rules", {
+        get: function () {
+            return rules;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Parameters, "rulesObservers", {
+        get: function () {
+            return rulesObservers;
         },
         enumerable: true,
         configurable: true

@@ -47,7 +47,8 @@ function main() {
     let firstDraw = true;
     let lastUpdate = 0;
     function mainLoop(time: number) {
-        const update = forceUpdate || (Parameters.autorun && (time - lastUpdate > Parameters.updateWaitTime));
+        const update = automaton.needToUpdate || forceUpdate ||
+            (Parameters.autorun && (time - lastUpdate > Parameters.updateWaitTime));
         if (update) {
             lastUpdate = time;
             automaton.update();

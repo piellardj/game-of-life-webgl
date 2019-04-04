@@ -12,7 +12,8 @@ float state(vec2 pos)
 
 void main(void)
 {
-    float nbAliveNeighbours = 
+    /* Compute amount of living neighbours */
+    float N = 
         state(coords + vec2(-1,-1) * uCellSize) +
         state(coords + vec2(-1,+0) * uCellSize) +
         state(coords + vec2(-1,+1) * uCellSize) +
@@ -24,10 +25,7 @@ void main(void)
 
     float currentState = state(coords);
 
-    float ifDead = step(2.5, nbAliveNeighbours) * step(nbAliveNeighbours, 3.5);
-    float ifAlive = 1.0 - (step(nbAliveNeighbours, 1.5) + step(3.5, nbAliveNeighbours));
-
-    currentState = mix(ifDead, ifAlive, currentState);
+    #INJECT(rules)
 
     gl_FragColor = vec4(vec3(currentState), 1);
 }

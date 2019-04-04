@@ -72,6 +72,192 @@
                     "checked": true
                 }
             ]
+        },
+        {
+            "title": "Rules",
+            "controls": [
+                {
+                    "title": "0 neighbour",
+                    "type": "tabs",
+                    "group": "neighbours-tabs-0",
+                    "options": [
+                        {
+                            "value": "death",
+                            "label": "Death",
+                            "checked": true
+                        },
+                        {
+                            "value": "alive",
+                            "label": "Alive"
+                        },
+                        {
+                            "value": "birth",
+                            "label": "Birth"
+                        }
+                    ]
+                },
+                {
+                    "title": "1 neighbour",
+                    "type": "tabs",
+                    "group": "neighbours-tabs-1",
+                    "options": [
+                        {
+                            "value": "death",
+                            "label": "Death",
+                            "checked": true
+                        },
+                        {
+                            "value": "alive",
+                            "label": "Alive"
+                        },
+                        {
+                            "value": "birth",
+                            "label": "Birth"
+                        }
+                    ]
+                },
+                {
+                    "title": "2 neighbours",
+                    "type": "tabs",
+                    "group": "neighbours-tabs-2",
+                    "options": [
+                        {
+                            "value": "death",
+                            "label": "Death"
+                        },
+                        {
+                            "value": "alive",
+                            "label": "Alive",
+                            "checked": true
+                        },
+                        {
+                            "value": "birth",
+                            "label": "Birth"
+                        }
+                    ]
+                },
+                {
+                    "title": "3 neighbours",
+                    "type": "tabs",
+                    "group": "neighbours-tabs-3",
+                    "options": [
+                        {
+                            "value": "death",
+                            "label": "Death"
+                        },
+                        {
+                            "value": "alive",
+                            "label": "Alive",
+                            "checked": true
+                        },
+                        {
+                            "value": "birth",
+                            "label": "Birth",
+                            "checked": true
+                        }
+                    ]
+                },
+                {
+                    "title": "4 neighbours",
+                    "type": "tabs",
+                    "group": "neighbours-tabs-4",
+                    "options": [
+                        {
+                            "value": "death",
+                            "label": "Death",
+                            "checked": true
+                        },
+                        {
+                            "value": "alive",
+                            "label": "Alive"
+                        },
+                        {
+                            "value": "birth",
+                            "label": "Birth"
+                        }
+                    ]
+                },
+                {
+                    "title": "5 neighbours",
+                    "type": "tabs",
+                    "group": "neighbours-tabs-5",
+                    "options": [
+                        {
+                            "value": "death",
+                            "label": "Death",
+                            "checked": true
+                        },
+                        {
+                            "value": "alive",
+                            "label": "Alive"
+                        },
+                        {
+                            "value": "birth",
+                            "label": "Birth"
+                        }
+                    ]
+                },
+                {
+                    "title": "6 neighbours",
+                    "type": "tabs",
+                    "group": "neighbours-tabs-6",
+                    "options": [
+                        {
+                            "value": "death",
+                            "label": "Death",
+                            "checked": true
+                        },
+                        {
+                            "value": "alive",
+                            "label": "Alive"
+                        },
+                        {
+                            "value": "birth",
+                            "label": "Birth"
+                        }
+                    ]
+                },
+                {
+                    "title": "7 neighbours",
+                    "type": "tabs",
+                    "group": "neighbours-tabs-7",
+                    "options": [
+                        {
+                            "value": "death",
+                            "label": "Death",
+                            "checked": true
+                        },
+                        {
+                            "value": "alive",
+                            "label": "Alive"
+                        },
+                        {
+                            "value": "birth",
+                            "label": "Birth"
+                        }
+                    ]
+                },
+                {
+                    "title": "8 neighbours",
+                    "type": "tabs",
+                    "group": "neighbours-tabs-8",
+                    "options": [
+                        {
+                            "value": "death",
+                            "label": "Death",
+                            "checked": true
+                        },
+                        {
+                            "value": "alive",
+                            "label": "Alive"
+                        },
+                        {
+                            "value": "birth",
+                            "label": "Birth"
+                        }
+                    ]
+                }
+            ]
         }
     ]
 }
