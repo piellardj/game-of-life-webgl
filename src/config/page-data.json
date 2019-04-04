@@ -2,8 +2,8 @@
     "title": "Game of Life",
     "description": "Variations of Conway's Game of Life, running on GPU.",
     "introduction": [
-        "This project is a simple tool for visualizing, editing and converting panoramas.",
-        "It supports skysphere, skybox and tiny planet formats, and can convert from one another."
+        "This project is a simple simulation of Conway's Game of Life, running on GPU.",
+        "The rules can be changed to see how the world evolves. You can use the mouse to zoom in and explore the world."
     ],
     "githubProjectName": "game-of-life-webgl",
     "additionalLinks": [],
