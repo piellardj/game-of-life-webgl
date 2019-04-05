@@ -176,7 +176,7 @@ class Automaton2D extends GLResource {
         ShaderManager.buildShader(
             {
                 fragmentFilename: "update-2D.frag",
-                vertexFilename: "fullscreen.vert",
+                vertexFilename: "update-2D.vert",
                 injected: { rules: this.generateShaderRules() },
             },
             (shader) => {

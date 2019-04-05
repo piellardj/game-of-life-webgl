@@ -248,7 +248,7 @@ var Automaton2D = (function (_super) {
         var _this = this;
         ShaderManager.buildShader({
             fragmentFilename: "update-2D.frag",
-            vertexFilename: "fullscreen.vert",
+            vertexFilename: "update-2D.vert",
             injected: { rules: this.generateShaderRules() },
         }, function (shader) {
             if (shader !== null) {
