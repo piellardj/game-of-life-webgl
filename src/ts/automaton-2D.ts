@@ -16,6 +16,7 @@ class Automaton2D extends GLResource {
     private _FBO: FBO;
     private _vbo: VBO;
 
+    private _gridSize: number[];
     private _textureSize: number[];
     private _textures: WebGLTexture[];
     private _currentIndex: number;
@@ -126,7 +127,7 @@ class Automaton2D extends GLResource {
 
             /* tslint:disable:no-string-literal */
             shader.u["uPrevious"].value = current;
-            shader.u["uCellSize"].value = [1 / this._textureSize[0], 1 / this._textureSize[1]];
+            shader.u["uPhysicalCellSize"].value = [1 / this._textureSize[0], 1 / this._textureSize[1]];
             /* tslint:enable:no-string-literal */
 
             shader.use();
@@ -147,6 +148,7 @@ class Automaton2D extends GLResource {
             /* tslint:disable:no-string-literal */
             shader.u["uClearFactor"].value = (this._mustClear) ? 1 : 1 - Parameters.persistence;
             shader.u["uTexture"].value = this._textures[this._currentIndex];
+            shader.u["uGridSize"].value = this._gridSize;
             /* tslint:enable:no-string-literal */
 
             shader.use();
@@ -236,8 +238,8 @@ class Automaton2D extends GLResource {
 
     private recomputeVisibleSubTexture(): void {
         const canvasSize = Canvas.getSize();
-        this._visibleSubTexture[2] = canvasSize[0] / this._textureSize[0] / Parameters.scale;
-        this._visibleSubTexture[3] = canvasSize[1] / this._textureSize[1] / Parameters.scale;
+        this._visibleSubTexture[2] = canvasSize[0] / this._gridSize[0] / Parameters.scale;
+        this._visibleSubTexture[3] = canvasSize[1] / this._gridSize[1] / Parameters.scale;
 
         for (let i = 0; i < 2; ++i) {
             this._visibleSubTexture[i] -= Math.min(0, this._visibleSubTexture[i]);
@@ -262,26 +264,27 @@ class Automaton2D extends GLResource {
         width = upperPowerOfTwo(width);
         height = upperPowerOfTwo(height);
 
-        this._FBO.width = width;
-        this._FBO.height = height;
+        this._gridSize = [width, height];
 
-        this._textureSize = [width, height];
+        const physicalWidth = width / 4;
+        const physicalHeight = height / 4;
 
-        this.freeTextures();
+        this._FBO.width = physicalWidth;
+        this._FBO.height = physicalHeight;
 
-        const data = new Uint8Array(4 * width * height);
-        for (let i = width * height; i > 0; --i) {
-            const value = 255 * Math.round(Math.random());
-            data[4 * i + 0] = value;
-            data[4 * i + 1] = value;
-            data[4 * i + 2] = value;
-            data[4 * i + 3] = 255;
+        this._textureSize = [physicalWidth, physicalHeight];
+
+        const data = new Uint8Array(4 * physicalWidth * physicalHeight);
+        for (let i = data.length - 1; i >= 0; --i) {
+            data[i] = Math.floor(256 * Math.random());
         }
 
         for (let i = 0; i < 2; ++i) {
-            this._textures[i] = gl.createTexture();
+            if (this._textures[i] === null) {
+                this._textures[i] = gl.createTexture();
+            }
             gl.bindTexture(gl.TEXTURE_2D, this._textures[i]);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, physicalWidth, physicalHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
         }
