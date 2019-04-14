@@ -1130,13 +1130,13 @@ window.addEventListener("load", function () {
     var _loop_1 = function (i) {
         Tabs.addObserver("neighbours-tabs-" + i, function (values) {
             var previous = rules[i];
-            if (rules[i] !== Rule.DEATH && values.includes(Rule.DEATH)) {
+            if (rules[i] !== Rule.DEATH && values.indexOf(Rule.DEATH) >= 0) {
                 rules[i] = Rule.DEATH;
             }
-            else if (rules[i] !== Rule.ALIVE && values.includes(Rule.ALIVE)) {
+            else if (rules[i] !== Rule.ALIVE && values.indexOf(Rule.ALIVE) >= 0) {
                 rules[i] = Rule.ALIVE;
             }
-            else if (rules[i] !== Rule.BIRTH && values.includes(Rule.BIRTH)) {
+            else if (rules[i] !== Rule.BIRTH && values.indexOf(Rule.BIRTH) >= 0) {
                 rules[i] = Rule.BIRTH;
             }
             updateRuleControl(i);
