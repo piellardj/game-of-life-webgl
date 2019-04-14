@@ -203,18 +203,18 @@ class Automaton2D extends GLResource {
                 const operation = (rule === "death") ? " -= " : " += ";
                 let rangeCheck;
                 if (starting === 0) {
-                    rangeCheck = "step(N, " + (ending + .5) + ");";
+                    rangeCheck = "step(N, " + (ending + .5) + ")";
 
                     if (ending === 8) {
-                        rangeCheck = "1";
+                        rangeCheck = "1.0";
                     }
                 } else if (ending === 8) {
-                    rangeCheck = "step(" + (starting - .5) + ", N);";
+                    rangeCheck = "step(" + (starting - .5) + ", N)";
                 } else {
-                    rangeCheck = "step(" + (starting - .5) + ", N) * step(N, " + (ending + .5) + ");";
+                    rangeCheck = "step(" + (starting - .5) + ", N) * step(N, " + (ending + .5) + ")";
                 }
 
-                return "currentState" + operation + rangeCheck + "\n";
+                return "currentState" + operation + rangeCheck + ";\n";
             }
             return "";
         }
