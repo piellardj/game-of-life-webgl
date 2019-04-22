@@ -31,13 +31,13 @@ function main() {
 
     let lastIteration = automaton.iteration;
     function updateIterationPerSecIndicator() {
-        Canvas.setIndicatorText("Iterations per second", automaton.iteration - lastIteration);
+        Canvas.setIndicatorText("iterations-per-sec", automaton.iteration - lastIteration);
         lastIteration = automaton.iteration;
     }
     window.setInterval(updateIterationPerSecIndicator, 1000);
 
     function updateIterationIndicator() {
-        Canvas.setIndicatorText("Iteration", automaton.iteration);
+        Canvas.setIndicatorText("iteration", automaton.iteration);
     }
     window.setInterval(updateIterationIndicator, 50);
 

@@ -1,7 +1,8 @@
 {
   "name": "game-of-life-webg",
-  "version": "0.0.1",
-  "description": "Panorama viewer and editor",
+  "version": "1.0.0",
+  "description": "Game of Life running on GPU",
+  "homepage": "https://piellardj.github.io/game-of-life-webgl",
   "main": "build/index.js",
   "scripts": {
     "build-demo-js": "npm run tsc && npm run webpack && npm run webpack-production",
@@ -15,7 +16,8 @@
     "webpack": "webpack --config src/config/webpack.config.js --mode=development --output docs/script/main.js",
     "webpack-production": "webpack --config src/config/webpack.config.js --mode=production --output docs/script/main.min.js"
   },
-  "author": "“Jérémie PIELLARD <jeremie.piellard@gmail.com> (https://github.com/piellardj)",
+  "author": "Jérémie PIELLARD <jeremie.piellard@gmail.com> (https://github.com/piellardj)",
+  "repository": "github:piellardj/game-of-life-webgl",
   "license": "ISC",
   "devDependencies": {
     "fs-extra": "^7.0.1",

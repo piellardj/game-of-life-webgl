@@ -292,7 +292,7 @@ class Automaton2D extends GLResource {
         this._currentIndex = 0;
         this._iteration = 0;
         this._needToRedraw = true;
-        Canvas.setIndicatorText("Grid size", width + "x" + height);
+        Canvas.setIndicatorText("grid-size", width + "x" + height);
     }
 }
 

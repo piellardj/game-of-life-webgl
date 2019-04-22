@@ -15,6 +15,10 @@
   </head>
 
   <body>
+    <header>
+      <a class="logo" href="https://piellardj.github.io"></a>
+    </header>
+
     <main>
       <div class="intro">
         <h1>Game of Life</h1>
@@ -40,43 +44,56 @@
         <input type="checkbox" id="side-pane-checkbox-id" class="hidden">
         <div id="canvas-container">
           <canvas id="canvas"></canvas>
-          <div class="loader"></div>
+          <div class="loader">
+            <span></span>
+            <div class="loader-animation"></div>
+          </div>
           <div id="indicators">
-            <span id="Iterations per second-indicator-id">Iterations per second:</span>
-            <br />
-            <span id="Iteration-indicator-id">Iteration:</span>
-            <br />
-            <span id="Grid size-indicator-id">Grid size:</span>
+            <div id="iterations-per-sec-indicator-id">
+              Iterations per second: <span></span>
+            </div>
+            <div id="iteration-indicator-id">
+              Iteration: <span></span>
+            </div>
+            <div id="grid-size-indicator-id">
+              Grid size: <span></span>
+            </div>
           </div>
           <div id="canvas-buttons-column">
-            <label id="fullscreen-toggle-id" for="fullscreen-checkbox-id"></label>
-            <label id="side-pane-toggle-id" for="side-pane-checkbox-id"></label>
+            <label class="canvas-button" id="fullscreen-toggle-id" for="fullscreen-checkbox-id"></label>
+            <label class="canvas-button" id="side-pane-toggle-id" for="side-pane-checkbox-id"></label>
           </div>
         </div>
         <div class="controls-block">
+          <label class="canvas-button" id="side-pane-close-toggle-id" for="side-pane-checkbox-id">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+              <line x1="22" y1="22" x2="10" y2="10" stroke-linecap="round" stroke-width="2" />
+              <line x1="22" y1="10" x2="10" y2="22" stroke-linecap="round" stroke-width="2" />
+            </svg>
+          </label>
 
           <section class="controls-section">
             <h2>Simulation</h2>
 
             <div class="controls-list">
-              <div class="control">
+              <div class="control" id="control-autorun-checkbox-id">
                 <label>Autorun:</label>
                 <div class="checkbox">
                   <input type="checkbox" id="autorun-checkbox-id" checked>
                   <label for="autorun-checkbox-id" class="checkmark"></label>
                 </div>
               </div>
-              <div class="control">
+              <div class="control" id="control-speed-range-id">
                 <label>Speed:</label>
                 <div class="range">
                   <input type="range" min="1" max="6" value="6" step="1" class="slider" id="speed-range-id">
                   <span class="tooltip"></span>
                 </div>
               </div>
-              <div class="control">
+              <div class="control" id="control-next-button-id">
                 <button class="button  flat" id="next-button-id">Next step</button>
               </div>
-              <div class="control">
+              <div class="control" id="control-reset-button-id">
                 <button class="button  flat" id="reset-button-id">Reset</button>
               </div>
             </div>
@@ -87,14 +104,14 @@
             <h2>Rendering</h2>
 
             <div class="controls-list">
-              <div class="control">
+              <div class="control" id="control-persistence-range-id">
                 <label>Persistence:</label>
                 <div class="range">
                   <input type="range" min="0" max="4" value="0" step="1" class="slider" id="persistence-range-id">
                   <span class="tooltip"></span>
                 </div>
               </div>
-              <div class="control">
+              <div class="control" id="control-indicators-checkbox-id">
                 <label>Show indicators:</label>
                 <div class="checkbox">
                   <input type="checkbox" id="indicators-checkbox-id" checked>
@@ -109,7 +126,7 @@
             <h2>Rules</h2>
 
             <div class="controls-list">
-              <div class="control">
+              <div class="control" id="control-neighbours-tabs-0">
                 <label>0 neighbour:</label>
                 <div class="tabs compact" id="neighbours-tabs-0-id">
                   <input type="checkbox" value="death" id="neighbours-tabs-0-death-id" checked />
@@ -120,7 +137,7 @@
                   <label for="neighbours-tabs-0-birth-id">Birth</label>
                 </div>
               </div>
-              <div class="control">
+              <div class="control" id="control-neighbours-tabs-1">
                 <label>1 neighbour:</label>
                 <div class="tabs compact" id="neighbours-tabs-1-id">
                   <input type="checkbox" value="death" id="neighbours-tabs-1-death-id" checked />
@@ -131,7 +148,7 @@
                   <label for="neighbours-tabs-1-birth-id">Birth</label>
                 </div>
               </div>
-              <div class="control">
+              <div class="control" id="control-neighbours-tabs-2">
                 <label>2 neighbours:</label>
                 <div class="tabs compact" id="neighbours-tabs-2-id">
                   <input type="checkbox" value="death" id="neighbours-tabs-2-death-id" />
@@ -142,7 +159,7 @@
                   <label for="neighbours-tabs-2-birth-id">Birth</label>
                 </div>
               </div>
-              <div class="control">
+              <div class="control" id="control-neighbours-tabs-3">
                 <label>3 neighbours:</label>
                 <div class="tabs compact" id="neighbours-tabs-3-id">
                   <input type="checkbox" value="death" id="neighbours-tabs-3-death-id" />
@@ -153,7 +170,7 @@
                   <label for="neighbours-tabs-3-birth-id">Birth</label>
                 </div>
               </div>
-              <div class="control">
+              <div class="control" id="control-neighbours-tabs-4">
                 <label>4 neighbours:</label>
                 <div class="tabs compact" id="neighbours-tabs-4-id">
                   <input type="checkbox" value="death" id="neighbours-tabs-4-death-id" checked />
@@ -164,7 +181,7 @@
                   <label for="neighbours-tabs-4-birth-id">Birth</label>
                 </div>
               </div>
-              <div class="control">
+              <div class="control" id="control-neighbours-tabs-5">
                 <label>5 neighbours:</label>
                 <div class="tabs compact" id="neighbours-tabs-5-id">
                   <input type="checkbox" value="death" id="neighbours-tabs-5-death-id" checked />
@@ -175,7 +192,7 @@
                   <label for="neighbours-tabs-5-birth-id">Birth</label>
                 </div>
               </div>
-              <div class="control">
+              <div class="control" id="control-neighbours-tabs-6">
                 <label>6 neighbours:</label>
                 <div class="tabs compact" id="neighbours-tabs-6-id">
                   <input type="checkbox" value="death" id="neighbours-tabs-6-death-id" checked />
@@ -186,7 +203,7 @@
                   <label for="neighbours-tabs-6-birth-id">Birth</label>
                 </div>
               </div>
-              <div class="control">
+              <div class="control" id="control-neighbours-tabs-7">
                 <label>7 neighbours:</label>
                 <div class="tabs compact" id="neighbours-tabs-7-id">
                   <input type="checkbox" value="death" id="neighbours-tabs-7-death-id" checked />
@@ -197,7 +214,7 @@
                   <label for="neighbours-tabs-7-birth-id">Birth</label>
                 </div>
               </div>
-              <div class="control">
+              <div class="control" id="control-neighbours-tabs-8">
                 <label>8 neighbours:</label>
                 <div class="tabs compact" id="neighbours-tabs-8-id">
                   <input type="checkbox" value="death" id="neighbours-tabs-8-death-id" checked />

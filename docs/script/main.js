@@ -342,7 +342,7 @@ var Automaton2D = (function (_super) {
         this._currentIndex = 0;
         this._iteration = 0;
         this._needToRedraw = true;
-        Canvas.setIndicatorText("Grid size", width + "x" + height);
+        Canvas.setIndicatorText("grid-size", width + "x" + height);
     };
     return Automaton2D;
 }(gl_resource_1.default));
@@ -1042,12 +1042,12 @@ function main() {
     var automaton = new automaton_2D_1.default();
     var lastIteration = automaton.iteration;
     function updateIterationPerSecIndicator() {
-        Canvas.setIndicatorText("Iterations per second", automaton.iteration - lastIteration);
+        Canvas.setIndicatorText("iterations-per-sec", automaton.iteration - lastIteration);
         lastIteration = automaton.iteration;
     }
     window.setInterval(updateIterationPerSecIndicator, 1000);
     function updateIterationIndicator() {
-        Canvas.setIndicatorText("Iteration", automaton.iteration);
+        Canvas.setIndicatorText("iteration", automaton.iteration);
     }
     window.setInterval(updateIterationIndicator, 50);
     var forceUpdate = false;
