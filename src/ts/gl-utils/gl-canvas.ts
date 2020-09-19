@@ -1,15 +1,14 @@
-declare const Demopage: any;
-declare const Canvas: any;
+import "../page-interface-generated";
 
 let gl: WebGLRenderingContext = null;
 
 /** Initializes a WebGL context */
 function initGL(flags: any): boolean {
     function setError(message: string) {
-        Demopage.setErrorMessage("webgl-support", message);
+        Page.Demopage.setErrorMessage("webgl-support", message);
     }
 
-    const canvas = Canvas.getCanvas();
+    const canvas = Page.Canvas.getCanvas();
 
     gl = canvas.getContext("webgl", flags) as WebGLRenderingContext;
     if (gl == null) {
@@ -34,12 +33,13 @@ function initGL(flags: any): boolean {
 /* Adjusts the GL canvas size to the actual canvas element size on the page */
 function adjustSize(hidpi: boolean = false): void {
     const cssPixel: number = (hidpi) ? window.devicePixelRatio : 1;
+    const canvas = gl.canvas as HTMLCanvasElement;
 
-    const width: number = Math.floor(gl.canvas.clientWidth * cssPixel);
-    const height: number = Math.floor(gl.canvas.clientHeight * cssPixel);
-    if (gl.canvas.width !== width || gl.canvas.height !== height) {
-        gl.canvas.width = width;
-        gl.canvas.height = height;
+    const width: number = Math.floor(canvas.clientWidth * cssPixel);
+    const height: number = Math.floor(canvas.clientHeight * cssPixel);
+    if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
     }
 }
 

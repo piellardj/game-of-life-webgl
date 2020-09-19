@@ -99,7 +99,7 @@ var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -108,15 +108,27 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
     return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var fbo_1 = __importDefault(__webpack_require__(/*! ./gl-utils/fbo */ "./tmp/script/gl-utils/fbo.js"));
@@ -125,6 +137,7 @@ var gl_resource_1 = __importDefault(__webpack_require__(/*! ./gl-utils/gl-resour
 var ShaderManager = __importStar(__webpack_require__(/*! ./gl-utils/shader-manager */ "./tmp/script/gl-utils/shader-manager.js"));
 var vbo_1 = __importDefault(__webpack_require__(/*! ./gl-utils/vbo */ "./tmp/script/gl-utils/vbo.js"));
 var parameters_1 = __importDefault(__webpack_require__(/*! ./parameters */ "./tmp/script/parameters.js"));
+__webpack_require__(/*! ./page-interface-generated */ "./tmp/script/page-interface-generated.js");
 var Automaton2D = (function (_super) {
     __extends(Automaton2D, _super);
     function Automaton2D() {
@@ -132,7 +145,7 @@ var Automaton2D = (function (_super) {
         _this._FBO = new fbo_1.default(gl_canvas_1.gl, 512, 512);
         _this._vbo = vbo_1.default.createQuad(gl_canvas_1.gl, -1, -1, 1, 1);
         var initializeTexturesForCanvas = function () {
-            var canvasSize = Canvas.getSize();
+            var canvasSize = Page.Canvas.getSize();
             _this.initializeTextures(canvasSize[0], canvasSize[1]);
             _this.recomputeVisibleSubTexture();
         };
@@ -141,14 +154,14 @@ var Automaton2D = (function (_super) {
         _this._textures = [null, null];
         _this._visibleSubTexture = [0, 0, 1, 1];
         initializeTexturesForCanvas();
-        Canvas.Observers.mouseDrag.push(function (dX, dY) {
+        Page.Canvas.Observers.mouseDrag.push(function (dX, dY) {
             _this._visibleSubTexture[0] -= dX * _this._visibleSubTexture[2];
             _this._visibleSubTexture[1] -= dY * _this._visibleSubTexture[3];
             _this.recomputeVisibleSubTexture();
             _this._needToRedraw = true;
             _this._mustClear = true;
         });
-        Canvas.Observers.canvasResize.push(initializeTexturesForCanvas);
+        Page.Canvas.Observers.canvasResize.push(initializeTexturesForCanvas);
         parameters_1.default.resetObservers.push(initializeTexturesForCanvas);
         parameters_1.default.rulesObservers.push(function () { return _this._needToRecomputeShader = true; });
         var previousScale = parameters_1.default.scale;
@@ -228,21 +241,21 @@ var Automaton2D = (function (_super) {
         get: function () {
             return this._iteration;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(Automaton2D.prototype, "needToRedraw", {
         get: function () {
             return this._needToRedraw;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(Automaton2D.prototype, "needToUpdate", {
         get: function () {
             return this._needToRecomputeShader;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Automaton2D.prototype.recomputeUpdateShader = function () {
@@ -298,7 +311,7 @@ var Automaton2D = (function (_super) {
         return result;
     };
     Automaton2D.prototype.recomputeVisibleSubTexture = function () {
-        var canvasSize = Canvas.getSize();
+        var canvasSize = Page.Canvas.getSize();
         this._visibleSubTexture[2] = canvasSize[0] / this._gridSize[0] / parameters_1.default.scale;
         this._visibleSubTexture[3] = canvasSize[1] / this._gridSize[1] / parameters_1.default.scale;
         for (var i = 0; i < 2; ++i) {
@@ -342,7 +355,7 @@ var Automaton2D = (function (_super) {
         this._currentIndex = 0;
         this._iteration = 0;
         this._needToRedraw = true;
-        Canvas.setIndicatorText("grid-size", width + "x" + height);
+        Page.Canvas.setIndicatorText("grid-size", width + "x" + height);
     };
     return Automaton2D;
 }(gl_resource_1.default));
@@ -364,7 +377,7 @@ var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -431,13 +444,15 @@ exports.default = FBO;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.gl = exports.initGL = exports.adjustSize = void 0;
+__webpack_require__(/*! ../page-interface-generated */ "./tmp/script/page-interface-generated.js");
 var gl = null;
 exports.gl = gl;
 function initGL(flags) {
     function setError(message) {
-        Demopage.setErrorMessage("webgl-support", message);
+        Page.Demopage.setErrorMessage("webgl-support", message);
     }
-    var canvas = Canvas.getCanvas();
+    var canvas = Page.Canvas.getCanvas();
     exports.gl = gl = canvas.getContext("webgl", flags);
     if (gl == null) {
         exports.gl = gl = canvas.getContext("experimental-webgl", flags);
@@ -458,11 +473,12 @@ exports.initGL = initGL;
 function adjustSize(hidpi) {
     if (hidpi === void 0) { hidpi = false; }
     var cssPixel = (hidpi) ? window.devicePixelRatio : 1;
-    var width = Math.floor(gl.canvas.clientWidth * cssPixel);
-    var height = Math.floor(gl.canvas.clientHeight * cssPixel);
-    if (gl.canvas.width !== width || gl.canvas.height !== height) {
-        gl.canvas.width = width;
-        gl.canvas.height = height;
+    var canvas = gl.canvas;
+    var width = Math.floor(canvas.clientWidth * cssPixel);
+    var height = Math.floor(canvas.clientHeight * cssPixel);
+    if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
     }
 }
 exports.adjustSize = adjustSize;
@@ -503,17 +519,30 @@ exports.default = GLResource;
 
 "use strict";
 
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.deleteShader = exports.registerShader = exports.getShader = exports.buildShader = void 0;
 var gl_canvas_1 = __webpack_require__(/*! ./gl-canvas */ "./tmp/script/gl-utils/gl-canvas.js");
 var shader_1 = __importDefault(__webpack_require__(/*! ./shader */ "./tmp/script/gl-utils/shader.js"));
 var ShaderSources = __importStar(__webpack_require__(/*! ./shader-sources */ "./tmp/script/gl-utils/shader-sources.js"));
@@ -612,6 +641,7 @@ exports.deleteShader = deleteShader;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.loadSource = exports.getSource = void 0;
 var cachedSources = {};
 function loadSource(filename, callback) {
     function callAndClearCallbacks(cached) {
@@ -686,7 +716,7 @@ var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -914,7 +944,7 @@ var __extends = (this && this.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -1008,15 +1038,27 @@ exports.default = Viewport;
 
 "use strict";
 
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
     return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var fbo_1 = __importDefault(__webpack_require__(/*! ./gl-utils/fbo */ "./tmp/script/gl-utils/fbo.js"));
@@ -1025,6 +1067,7 @@ var gl_canvas_1 = __webpack_require__(/*! ./gl-utils/gl-canvas */ "./tmp/script/
 var viewport_1 = __importDefault(__webpack_require__(/*! ./gl-utils/viewport */ "./tmp/script/gl-utils/viewport.js"));
 var automaton_2D_1 = __importDefault(__webpack_require__(/*! ./automaton-2D */ "./tmp/script/automaton-2D.js"));
 var parameters_1 = __importDefault(__webpack_require__(/*! ./parameters */ "./tmp/script/parameters.js"));
+__webpack_require__(/*! ./page-interface-generated */ "./tmp/script/page-interface-generated.js");
 function main() {
     var glParams = {
         alpha: false,
@@ -1034,20 +1077,20 @@ function main() {
         return;
     }
     gl_canvas_1.gl.blendFunc(gl_canvas_1.gl.ONE, gl_canvas_1.gl.ONE_MINUS_SRC_ALPHA);
-    Canvas.showLoader(true);
+    Page.Canvas.showLoader(true);
     var needToAdjustSize = true;
-    Canvas.Observers.canvasResize.push(function () { return needToAdjustSize = true; });
+    Page.Canvas.Observers.canvasResize.push(function () { return needToAdjustSize = true; });
     parameters_1.default.autorun = true;
     parameters_1.default.persistence = 0;
     var automaton = new automaton_2D_1.default();
     var lastIteration = automaton.iteration;
     function updateIterationPerSecIndicator() {
-        Canvas.setIndicatorText("iterations-per-sec", automaton.iteration - lastIteration);
+        Page.Canvas.setIndicatorText("iterations-per-sec", "" + (automaton.iteration - lastIteration));
         lastIteration = automaton.iteration;
     }
     window.setInterval(updateIterationPerSecIndicator, 1000);
     function updateIterationIndicator() {
-        Canvas.setIndicatorText("iteration", automaton.iteration);
+        Page.Canvas.setIndicatorText("iteration", "" + automaton.iteration);
     }
     window.setInterval(updateIterationIndicator, 50);
     var forceUpdate = false;
@@ -1072,7 +1115,7 @@ function main() {
             automaton.draw();
             if (firstDraw) {
                 firstDraw = false;
-                Canvas.showLoader(false);
+                Page.Canvas.showLoader(false);
             }
         }
         requestAnimationFrame(mainLoop);
@@ -1080,6 +1123,19 @@ function main() {
     requestAnimationFrame(mainLoop);
 }
 main();
+
+
+/***/ }),
+
+/***/ "./tmp/script/page-interface-generated.js":
+/*!************************************************!*\
+  !*** ./tmp/script/page-interface-generated.js ***!
+  \************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 
 /***/ }),
@@ -1094,6 +1150,7 @@ main();
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+__webpack_require__(/*! ./page-interface-generated */ "./tmp/script/page-interface-generated.js");
 var Rule;
 (function (Rule) {
     Rule["DEATH"] = "death";
@@ -1113,13 +1170,13 @@ var rules = [
 ];
 function updateRuleControl(id) {
     if (rules[id] === Rule.DEATH) {
-        Tabs.setValues("neighbours-tabs-" + id, ["death"]);
+        Page.Tabs.setValues("neighbours-tabs-" + id, ["death"]);
     }
     else if (rules[id] === Rule.ALIVE) {
-        Tabs.setValues("neighbours-tabs-" + id, ["alive"]);
+        Page.Tabs.setValues("neighbours-tabs-" + id, ["alive"]);
     }
     else if (rules[id] === Rule.BIRTH) {
-        Tabs.setValues("neighbours-tabs-" + id, ["alive", "birth"]);
+        Page.Tabs.setValues("neighbours-tabs-" + id, ["alive", "birth"]);
     }
 }
 for (var i = 0; i < 9; ++i) {
@@ -1128,7 +1185,7 @@ for (var i = 0; i < 9; ++i) {
 var rulesObservers = [];
 window.addEventListener("load", function () {
     var _loop_1 = function (i) {
-        Tabs.addObserver("neighbours-tabs-" + i, function (values) {
+        Page.Tabs.addObserver("neighbours-tabs-" + i, function (values) {
             var previous = rules[i];
             if (rules[i] !== Rule.DEATH && values.indexOf(Rule.DEATH) >= 0) {
                 rules[i] = Rule.DEATH;
@@ -1151,20 +1208,20 @@ window.addEventListener("load", function () {
 });
 var autorun;
 var AUTORUN_CONTROL_ID = "autorun-checkbox-id";
-Checkbox.addObserver(AUTORUN_CONTROL_ID, function (checked) {
+Page.Checkbox.addObserver(AUTORUN_CONTROL_ID, function (checked) {
     autorun = checked;
 });
-autorun = Checkbox.isChecked(AUTORUN_CONTROL_ID);
+autorun = Page.Checkbox.isChecked(AUTORUN_CONTROL_ID);
 var speed;
 var updateWaitTime = [1000 / 1, 1000 / 2, 1000 / 5, 1000 / 11, 1000 / 31, 0];
 var SPEED_CONTROL_ID = "speed-range-id";
-Range.addObserver(SPEED_CONTROL_ID, function (newValue) {
+Page.Range.addObserver(SPEED_CONTROL_ID, function (newValue) {
     speed = newValue;
 });
-speed = Range.getValue(SPEED_CONTROL_ID);
+speed = Page.Range.getValue(SPEED_CONTROL_ID);
 var NEXT_STEP_CONTROL_ID = "next-button-id";
 var nextStepObservers = [];
-Button.addObserver(NEXT_STEP_CONTROL_ID, function () {
+Page.Button.addObserver(NEXT_STEP_CONTROL_ID, function () {
     for (var _i = 0, nextStepObservers_1 = nextStepObservers; _i < nextStepObservers_1.length; _i++) {
         var observer = nextStepObservers_1[_i];
         observer();
@@ -1172,7 +1229,7 @@ Button.addObserver(NEXT_STEP_CONTROL_ID, function () {
 });
 var RESET_CONTROL_ID = "reset-button-id";
 var resetObservers = [];
-Button.addObserver(RESET_CONTROL_ID, function () {
+Page.Button.addObserver(RESET_CONTROL_ID, function () {
     for (var _i = 0, resetObservers_1 = resetObservers; _i < resetObservers_1.length; _i++) {
         var observer = resetObservers_1[_i];
         observer();
@@ -1182,24 +1239,24 @@ var persistence;
 var persistenceObservers = [];
 var persistenceScale = [0, .6, .7, .8, .9];
 var PERSISTENCE_CONTROL_ID = "persistence-range-id";
-Range.addObserver(PERSISTENCE_CONTROL_ID, function (newValue) {
+Page.Range.addObserver(PERSISTENCE_CONTROL_ID, function (newValue) {
     persistence = newValue;
     for (var _i = 0, persistenceObservers_1 = persistenceObservers; _i < persistenceObservers_1.length; _i++) {
         var observer = persistenceObservers_1[_i];
         observer(persistence);
     }
 });
-persistence = Range.getValue(PERSISTENCE_CONTROL_ID);
+persistence = Page.Range.getValue(PERSISTENCE_CONTROL_ID);
 var scale;
 var MIN_SCALE = 1;
 var MAX_SCALE = 10;
 var scaleObservers = [];
-Canvas.Observers.mouseWheel.push(function (delta, zoomCenter) {
+Page.Canvas.Observers.mouseWheel.push(function (delta, zoomCenter) {
     var newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale - delta));
     if (newScale !== scale) {
         scale = newScale;
         if (!zoomCenter) {
-            zoomCenter = Canvas.getMousePosition();
+            zoomCenter = Page.Canvas.getMousePosition();
         }
         for (var _i = 0, scaleObservers_1 = scaleObservers; _i < scaleObservers_1.length; _i++) {
             var observer = scaleObservers_1[_i];
@@ -1209,8 +1266,8 @@ Canvas.Observers.mouseWheel.push(function (delta, zoomCenter) {
 });
 scale = MIN_SCALE;
 var INDICATORS_CONTROL_ID = "indicators-checkbox-id";
-Checkbox.addObserver(INDICATORS_CONTROL_ID, function (checked) {
-    Canvas.setIndicatorsVisibility(checked);
+Page.Checkbox.addObserver(INDICATORS_CONTROL_ID, function (checked) {
+    Page.Canvas.setIndicatorsVisibility(checked);
 });
 var Parameters = (function () {
     function Parameters() {
@@ -1221,44 +1278,44 @@ var Parameters = (function () {
         },
         set: function (ar) {
             autorun = ar;
-            Checkbox.setChecked(AUTORUN_CONTROL_ID, ar);
+            Page.Checkbox.setChecked(AUTORUN_CONTROL_ID, ar);
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(Parameters, "updateWaitTime", {
         get: function () {
             return updateWaitTime[speed - 1];
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(Parameters, "nextStepObservers", {
         get: function () {
             return nextStepObservers;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(Parameters, "resetObservers", {
         get: function () {
             return resetObservers;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(Parameters, "scale", {
         get: function () {
             return scale;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(Parameters, "scaleObservers", {
         get: function () {
             return scaleObservers;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(Parameters, "persistence", {
@@ -1266,31 +1323,31 @@ var Parameters = (function () {
             return persistenceScale[persistence];
         },
         set: function (newValue) {
-            Range.setValue(PERSISTENCE_CONTROL_ID, newValue);
-            persistence = Range.getValue(PERSISTENCE_CONTROL_ID);
+            Page.Range.setValue(PERSISTENCE_CONTROL_ID, newValue);
+            persistence = Page.Range.getValue(PERSISTENCE_CONTROL_ID);
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(Parameters, "persistenceObservers", {
         get: function () {
             return persistenceObservers;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(Parameters, "rules", {
         get: function () {
             return rules;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(Parameters, "rulesObservers", {
         get: function () {
             return rulesObservers;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     return Parameters;

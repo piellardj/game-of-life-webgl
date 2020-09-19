@@ -1,8 +1,4 @@
-declare const Button: any;
-declare const Canvas: any;
-declare const Checkbox: any;
-declare const Range: any;
-declare const Tabs: any;
+import "./page-interface-generated";
 
 enum Rule {
     DEATH = "death",
@@ -24,22 +20,23 @@ const rules: Rule[] = [
 
 function updateRuleControl(id: number) {
     if (rules[id] === Rule.DEATH) {
-        Tabs.setValues("neighbours-tabs-" + id, ["death"]);
+        Page.Tabs.setValues("neighbours-tabs-" + id, ["death"]);
     } else if (rules[id] === Rule.ALIVE) {
-        Tabs.setValues("neighbours-tabs-" + id, ["alive"]);
+        Page.Tabs.setValues("neighbours-tabs-" + id, ["alive"]);
     } else if (rules[id] === Rule.BIRTH) {
-        Tabs.setValues("neighbours-tabs-" + id, ["alive", "birth"]);
+        Page.Tabs.setValues("neighbours-tabs-" + id, ["alive", "birth"]);
     }
 }
 for (let i = 0; i < 9; ++i) {
     updateRuleControl(i);
 }
 
-const rulesObservers: Array<() => void> = [];
+type RuleObserver = () => void;
+const rulesObservers: RuleObserver[] = [];
 
 window.addEventListener("load", () => {
     for (let i = 0; i < 9; ++i) {
-        Tabs.addObserver("neighbours-tabs-" + i, (values) => {
+        Page.Tabs.addObserver("neighbours-tabs-" + i, (values) => {
             const previous = rules[i];
 
             if (rules[i] !== Rule.DEATH && values.indexOf(Rule.DEATH) >= 0) {
@@ -64,22 +61,22 @@ type RangeObserver = (newValue: number) => void;
 
 let autorun: boolean;
 const AUTORUN_CONTROL_ID = "autorun-checkbox-id";
-Checkbox.addObserver(AUTORUN_CONTROL_ID, (checked: boolean) => {
+Page.Checkbox.addObserver(AUTORUN_CONTROL_ID, (checked: boolean) => {
     autorun = checked;
 });
-autorun = Checkbox.isChecked(AUTORUN_CONTROL_ID);
+autorun = Page.Checkbox.isChecked(AUTORUN_CONTROL_ID);
 
 let speed: number;
 const updateWaitTime = [1000 / 1, 1000 / 2, 1000 / 5, 1000 / 11, 1000 / 31, 0]; // iterations per second
 const SPEED_CONTROL_ID = "speed-range-id";
-Range.addObserver(SPEED_CONTROL_ID, (newValue: number) => {
+Page.Range.addObserver(SPEED_CONTROL_ID, (newValue: number) => {
     speed = newValue;
 });
-speed = Range.getValue(SPEED_CONTROL_ID);
+speed = Page.Range.getValue(SPEED_CONTROL_ID);
 
 const NEXT_STEP_CONTROL_ID = "next-button-id";
 const nextStepObservers: ButtonObserver[] = [];
-Button.addObserver(NEXT_STEP_CONTROL_ID,  () => {
+Page.Button.addObserver(NEXT_STEP_CONTROL_ID,  () => {
     for (const observer of nextStepObservers) {
         observer();
     }
@@ -87,7 +84,7 @@ Button.addObserver(NEXT_STEP_CONTROL_ID,  () => {
 
 const RESET_CONTROL_ID = "reset-button-id";
 const resetObservers: ButtonObserver[] = [];
-Button.addObserver(RESET_CONTROL_ID,  () => {
+Page.Button.addObserver(RESET_CONTROL_ID,  () => {
     for (const observer of resetObservers) {
         observer();
     }
@@ -97,28 +94,28 @@ let persistence: number;
 const persistenceObservers: RangeObserver[] = [];
 const persistenceScale = [0, .6, .7, .8, .9];
 const PERSISTENCE_CONTROL_ID = "persistence-range-id";
-Range.addObserver(PERSISTENCE_CONTROL_ID, (newValue: number) => {
+Page.Range.addObserver(PERSISTENCE_CONTROL_ID, (newValue: number) => {
     persistence = newValue;
 
     for (const observer of persistenceObservers) {
         observer(persistence);
     }
 });
-persistence = Range.getValue(PERSISTENCE_CONTROL_ID);
+persistence = Page.Range.getValue(PERSISTENCE_CONTROL_ID);
 
 let scale: number;
 const MIN_SCALE = 1;
 const MAX_SCALE = 10;
 type ScaleObserver = (newScale: number, zoomCenter: number[]) => void;
 const scaleObservers: ScaleObserver[] = [];
-Canvas.Observers.mouseWheel.push((delta: number, zoomCenter: number[]) => {
+Page.Canvas.Observers.mouseWheel.push((delta: number, zoomCenter: number[]) => {
     const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE,  scale - delta));
 
     if (newScale !== scale) {
         scale = newScale;
 
         if (!zoomCenter) {
-            zoomCenter = Canvas.getMousePosition();
+            zoomCenter = Page.Canvas.getMousePosition();
         }
 
         for (const observer of scaleObservers) {
@@ -129,8 +126,8 @@ Canvas.Observers.mouseWheel.push((delta: number, zoomCenter: number[]) => {
 scale = MIN_SCALE;
 
 const INDICATORS_CONTROL_ID = "indicators-checkbox-id";
-Checkbox.addObserver(INDICATORS_CONTROL_ID, (checked: boolean) => {
-    Canvas.setIndicatorsVisibility(checked);
+Page.Checkbox.addObserver(INDICATORS_CONTROL_ID, (checked: boolean) => {
+    Page.Canvas.setIndicatorsVisibility(checked);
 });
 
 class Parameters {
@@ -139,7 +136,7 @@ class Parameters {
     }
     public static set autorun(ar: boolean) {
         autorun = ar;
-        Checkbox.setChecked(AUTORUN_CONTROL_ID, ar);
+        Page.Checkbox.setChecked(AUTORUN_CONTROL_ID, ar);
     }
 
     public static get updateWaitTime(): number {
@@ -165,8 +162,8 @@ class Parameters {
         return persistenceScale[persistence];
     }
     public static set persistence(newValue: number) {
-        Range.setValue(PERSISTENCE_CONTROL_ID, newValue);
-        persistence = Range.getValue(PERSISTENCE_CONTROL_ID);
+        Page.Range.setValue(PERSISTENCE_CONTROL_ID, newValue);
+        persistence = Page.Range.getValue(PERSISTENCE_CONTROL_ID);
     }
     public static get persistenceObservers(): RangeObserver[] {
         return persistenceObservers;
@@ -175,7 +172,7 @@ class Parameters {
     public static get rules(): Rule[] {
         return rules;
     }
-    public static get rulesObservers(): Array<() => void> {
+    public static get rulesObservers(): RuleObserver[] {
         return rulesObservers;
     }
 

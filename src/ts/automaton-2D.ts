@@ -7,7 +7,7 @@ import VBO from "./gl-utils/vbo";
 
 import Parameters from "./parameters";
 
-declare const Canvas: any;
+import "./page-interface-generated";
 
 class Automaton2D extends GLResource {
     private _displayShader: Shader;
@@ -35,7 +35,7 @@ class Automaton2D extends GLResource {
         this._vbo = VBO.createQuad(gl, -1, -1, 1, 1);
 
         const initializeTexturesForCanvas = () => {
-            const canvasSize = Canvas.getSize();
+            const canvasSize = Page.Canvas.getSize();
             this.initializeTextures(canvasSize[0], canvasSize[1]);
             this.recomputeVisibleSubTexture();
         };
@@ -47,7 +47,7 @@ class Automaton2D extends GLResource {
         this._visibleSubTexture = [0, 0, 1, 1];
         initializeTexturesForCanvas();
 
-        Canvas.Observers.mouseDrag.push((dX: number, dY: number) => {
+        Page.Canvas.Observers.mouseDrag.push((dX: number, dY: number) => {
             this._visibleSubTexture[0] -= dX * this._visibleSubTexture[2];
             this._visibleSubTexture[1] -= dY * this._visibleSubTexture[3];
             this.recomputeVisibleSubTexture();
@@ -55,7 +55,7 @@ class Automaton2D extends GLResource {
             this._mustClear = true;
         });
 
-        Canvas.Observers.canvasResize.push(initializeTexturesForCanvas);
+        Page.Canvas.Observers.canvasResize.push(initializeTexturesForCanvas);
         Parameters.resetObservers.push(initializeTexturesForCanvas);
         Parameters.rulesObservers.push(() => this._needToRecomputeShader = true );
 
@@ -237,7 +237,7 @@ class Automaton2D extends GLResource {
     }
 
     private recomputeVisibleSubTexture(): void {
-        const canvasSize = Canvas.getSize();
+        const canvasSize = Page.Canvas.getSize();
         this._visibleSubTexture[2] = canvasSize[0] / this._gridSize[0] / Parameters.scale;
         this._visibleSubTexture[3] = canvasSize[1] / this._gridSize[1] / Parameters.scale;
 
@@ -292,7 +292,7 @@ class Automaton2D extends GLResource {
         this._currentIndex = 0;
         this._iteration = 0;
         this._needToRedraw = true;
-        Canvas.setIndicatorText("grid-size", width + "x" + height);
+        Page.Canvas.setIndicatorText("grid-size", width + "x" + height);
     }
 }
 

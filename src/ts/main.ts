@@ -6,7 +6,7 @@ import Viewport from "./gl-utils/viewport";
 import Automaton2D from "./automaton-2D";
 import Parameters from "./parameters";
 
-declare const Canvas: any;
+import "./page-interface-generated";
 
 function main() {
     const glParams = {
@@ -19,10 +19,10 @@ function main() {
 
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
-    Canvas.showLoader(true);
+    Page.Canvas.showLoader(true);
 
     let needToAdjustSize = true;
-    Canvas.Observers.canvasResize.push(() => needToAdjustSize = true);
+    Page.Canvas.Observers.canvasResize.push(() => needToAdjustSize = true);
 
     Parameters.autorun = true;
     Parameters.persistence = 0;
@@ -31,13 +31,13 @@ function main() {
 
     let lastIteration = automaton.iteration;
     function updateIterationPerSecIndicator() {
-        Canvas.setIndicatorText("iterations-per-sec", automaton.iteration - lastIteration);
+        Page.Canvas.setIndicatorText("iterations-per-sec", "" + (automaton.iteration - lastIteration));
         lastIteration = automaton.iteration;
     }
     window.setInterval(updateIterationPerSecIndicator, 1000);
 
     function updateIterationIndicator() {
-        Canvas.setIndicatorText("iteration", automaton.iteration);
+        Page.Canvas.setIndicatorText("iteration", "" + automaton.iteration);
     }
     window.setInterval(updateIterationIndicator, 50);
 
@@ -70,7 +70,7 @@ function main() {
             if (firstDraw) {
                 firstDraw = false;
 
-                Canvas.showLoader(false);
+                Page.Canvas.showLoader(false);
             }
         }
 
