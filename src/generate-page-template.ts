@@ -12,7 +12,7 @@ const data = {
     githubProjectName: "game-of-life-webgl",
     additionalLinks: [],
     scriptFiles: [
-        "script/main.js"
+        "script/main.min.js"
     ],
     indicators: [
         {
