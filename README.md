@@ -5,6 +5,9 @@ This project is a simple simulation of Conway's Game of Life, running on GPU.
 
 The rules can be changed to see how the world evolves. You can use the mouse to zoom in and explore the world.
 
+See it live [here](https://piellardj.github.io/game-of-life-webgl/?page%3Acanvas%3Afullscreen=true&page%3Acanvas%3Asidepane=true).
+
+![Illustration](src/resources/README/illustration.png)
 ## Details
 
 ### Texel packing
