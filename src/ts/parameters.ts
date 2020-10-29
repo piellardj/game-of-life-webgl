@@ -103,14 +103,16 @@ Page.Range.addObserver(PERSISTENCE_CONTROL_ID, (newValue: number) => {
 });
 persistence = Page.Range.getValue(PERSISTENCE_CONTROL_ID);
 
-let scale: number;
+let scale: number; // integer
+let exactScale: number;
 const MIN_SCALE = 1;
 const MAX_SCALE = 10;
 type ScaleObserver = (newScale: number, zoomCenter: number[]) => void;
 const scaleObservers: ScaleObserver[] = [];
 Page.Canvas.Observers.mouseWheel.push((delta: number, zoomCenter: number[]) => {
-    const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE,  scale - delta));
+    exactScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE,  exactScale - delta));
 
+    const newScale = Math.round(exactScale);
     if (newScale !== scale) {
         scale = newScale;
 
@@ -124,6 +126,7 @@ Page.Canvas.Observers.mouseWheel.push((delta: number, zoomCenter: number[]) => {
     }
 });
 scale = MIN_SCALE;
+exactScale = scale;
 
 const INDICATORS_CONTROL_ID = "indicators-checkbox-id";
 Page.Checkbox.addObserver(INDICATORS_CONTROL_ID, (checked: boolean) => {
