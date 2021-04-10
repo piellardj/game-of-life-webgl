@@ -6,6 +6,10 @@ module.exports = {
     devtool: "source-map",
     mode: "production",
     entry: path.join(PROJECT_DIR, "src", "ts", "main.ts"),
+    output: {
+        path: path.join(PROJECT_DIR, "docs", "script"),
+        filename: "[name].min.js"
+    },
     resolve: {
         extensions: [".ts"]
     },

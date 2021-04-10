@@ -11,12 +11,17 @@
     <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16">
     <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32">
     <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96">
-    <link rel="stylesheet" type="text/css" href="css/page.css">
+    <link rel="stylesheet" type="text/css" href="css/page.css?v=2021-04-10T19%3A01%3A37.005Z">
   </head>
 
   <body>
     <header>
-      <a class="logo" href="https://piellardj.github.io"></a>
+      <a class="logo logo-animate-fill" href="https://piellardj.github.io" id="back-to-home-button" aria-label="Go to home">
+        <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+          <g stroke-width="2">
+            <path fill="none" stroke-linejoin="round" d="M17.5,32h4.5v11h7v-7l1,-1h4l1,1v7h7v-11h4.5L32,16.5z" />
+        </svg>
+      </a>
     </header>
     <main>
       <div class="intro">
@@ -69,7 +74,6 @@
               <line x1="22" y1="10" x2="10" y2="22" stroke-linecap="round" stroke-width="2" />
             </svg>
           </label>
-
           <section class="controls-section">
             <h2>Simulation</h2>
 
@@ -83,9 +87,26 @@
               </div>
               <div class="control" id="control-speed-range-id">
                 <label>Speed:</label>
-                <div class="range">
+                <div class="range-container">
                   <input type="range" min="1" max="6" value="6" step="1" class="slider" id="speed-range-id">
-                  <span class="tooltip"></span>
+                  <div class="range-skin-container">
+                    <div class="range-stub">
+                      <span class="range-bar range-bar-left range-stub-left"></span>
+                    </div>
+                    <div class="range-progress">
+                      <div class="range-progress-left">
+                        <span class="range-bar range-bar-left"></span>
+                        <span class="range-handle"></span>
+                        <output for="speed-range-id" class="range-tooltip"></output>
+                      </div>
+                      <div class="range-progress-right">
+                        <span class="range-bar range-bar-right"></span>
+                      </div>
+                    </div>
+                    <div class="range-stub">
+                      <span class="range-bar range-bar-right range-stub-right"></span>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div class="control" id="control-next-button-id">
@@ -97,16 +118,32 @@
             </div>
           </section>
           <hr />
-
           <section class="controls-section">
             <h2>Rendering</h2>
 
             <div class="controls-list">
               <div class="control" id="control-persistence-range-id">
                 <label>Persistence:</label>
-                <div class="range">
+                <div class="range-container">
                   <input type="range" min="0" max="4" value="0" step="1" class="slider" id="persistence-range-id">
-                  <span class="tooltip"></span>
+                  <div class="range-skin-container">
+                    <div class="range-stub">
+                      <span class="range-bar range-bar-left range-stub-left"></span>
+                    </div>
+                    <div class="range-progress">
+                      <div class="range-progress-left">
+                        <span class="range-bar range-bar-left"></span>
+                        <span class="range-handle"></span>
+                        <output for="persistence-range-id" class="range-tooltip"></output>
+                      </div>
+                      <div class="range-progress-right">
+                        <span class="range-bar range-bar-right"></span>
+                      </div>
+                    </div>
+                    <div class="range-stub">
+                      <span class="range-bar range-bar-right range-stub-right"></span>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div class="control" id="control-indicators-checkbox-id">
@@ -119,7 +156,6 @@
             </div>
           </section>
           <hr />
-
           <section class="controls-section">
             <h2>Rules</h2>
 
@@ -252,8 +288,8 @@
         </a>
       </div>
     </footer>
-    <script src="script/page.min.js"></script>
-    <script src="script/main.min.js"></script>
+    <script src="script/page.min.js?v=2021-04-10T19%3A01%3A37.005Z"></script>
+    <script src="script/main.min.js?v=2021-04-10T19%3A01%3A37.005Z"></script>
   </body>
 
 </html>

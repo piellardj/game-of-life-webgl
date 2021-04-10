@@ -27,9 +27,6 @@ function updateRuleControl(id: number) {
         Page.Tabs.setValues("neighbours-tabs-" + id, ["alive", "birth"]);
     }
 }
-for (let i = 0; i < 9; ++i) {
-    updateRuleControl(i);
-}
 
 type RuleObserver = () => void;
 const rulesObservers: RuleObserver[] = [];
@@ -53,6 +50,8 @@ window.addEventListener("load", () => {
                 rulesObservers.forEach((callback) => callback());
             }
         });
+
+        updateRuleControl(i);
     }
 });
 
@@ -76,7 +75,7 @@ speed = Page.Range.getValue(SPEED_CONTROL_ID);
 
 const NEXT_STEP_CONTROL_ID = "next-button-id";
 const nextStepObservers: ButtonObserver[] = [];
-Page.Button.addObserver(NEXT_STEP_CONTROL_ID,  () => {
+Page.Button.addObserver(NEXT_STEP_CONTROL_ID, () => {
     for (const observer of nextStepObservers) {
         observer();
     }
@@ -84,7 +83,7 @@ Page.Button.addObserver(NEXT_STEP_CONTROL_ID,  () => {
 
 const RESET_CONTROL_ID = "reset-button-id";
 const resetObservers: ButtonObserver[] = [];
-Page.Button.addObserver(RESET_CONTROL_ID,  () => {
+Page.Button.addObserver(RESET_CONTROL_ID, () => {
     for (const observer of resetObservers) {
         observer();
     }
@@ -110,7 +109,7 @@ const MAX_SCALE = 10;
 type ScaleObserver = (newScale: number, zoomCenter: number[]) => void;
 const scaleObservers: ScaleObserver[] = [];
 Page.Canvas.Observers.mouseWheel.push((delta: number, zoomCenter: number[]) => {
-    exactScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE,  exactScale - delta));
+    exactScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, exactScale - delta));
 
     const newScale = Math.round(exactScale);
     if (newScale !== scale) {
@@ -179,7 +178,7 @@ class Parameters {
         return rulesObservers;
     }
 
-    private constructor() {}
+    private constructor() { }
 }
 
 export default Parameters;
