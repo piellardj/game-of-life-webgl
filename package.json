@@ -1,6 +1,5 @@
 {
   "name": "game-of-life-webg",
-  "version": "1.0.0",
   "description": "Game of Life running on GPU",
   "homepage": "https://piellardj.github.io/game-of-life-webgl",
   "main": "build/index.js",
