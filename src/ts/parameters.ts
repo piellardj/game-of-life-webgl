@@ -19,23 +19,48 @@ const rules: Rule[] = [
 ];
 
 function updateRuleControl(id: number) {
+    const controlId = `neighbours-tabs-${id}`;
     if (rules[id] === Rule.DEATH) {
-        Page.Tabs.setValues("neighbours-tabs-" + id, ["death"]);
+        Page.Tabs.setValues(controlId, ["death"]);
     } else if (rules[id] === Rule.ALIVE) {
-        Page.Tabs.setValues("neighbours-tabs-" + id, ["alive"]);
+        Page.Tabs.setValues(controlId, ["alive"]);
     } else if (rules[id] === Rule.BIRTH) {
-        Page.Tabs.setValues("neighbours-tabs-" + id, ["alive", "birth"]);
+        Page.Tabs.setValues(controlId, ["alive", "birth"]);
     }
+    Page.Tabs.storeState(controlId);
 }
 
 type RuleObserver = () => void;
 const rulesObservers: RuleObserver[] = [];
 
-window.addEventListener("load", () => {
-    for (let i = 0; i < 9; ++i) {
-        Page.Tabs.addObserver("neighbours-tabs-" + i, (values) => {
-            const previous = rules[i];
+const CUSTOM_RULE_FLAG = "customrules";
+function addCustomRulesUrlFlag(): void {
+    if (typeof URLSearchParams !== "undefined") {
+        const searchParamsObject = new URLSearchParams(window.location.search);
+        searchParamsObject.set(CUSTOM_RULE_FLAG, "true");
+        const searchParams = searchParamsObject.toString();
 
+        const newUrl = window.location.origin + window.location.pathname + (searchParams ? `?${searchParams}` : "")
+        window.history.replaceState("", "", newUrl);
+    }
+}
+
+function isCustomRulesUrlFlagPresent(): boolean {
+    if (typeof URLSearchParams !== "undefined") {
+        const searchParamsObject = new URLSearchParams(window.location.search);
+        return searchParamsObject.has(CUSTOM_RULE_FLAG);
+    }
+    return false;
+}
+
+window.addEventListener("load", () => {
+    const customRules = isCustomRulesUrlFlagPresent();
+
+    for (let i = 0; i < 9; ++i) {
+        const controlId = `neighbours-tabs-${i}`;
+
+        Page.Tabs.addObserver(controlId, (values) => {
+            const previous = rules[i];
             if (rules[i] !== Rule.DEATH && values.indexOf(Rule.DEATH) >= 0) {
                 rules[i] = Rule.DEATH;
             } else if (rules[i] !== Rule.ALIVE && values.indexOf(Rule.ALIVE) >= 0) {
@@ -45,14 +70,27 @@ window.addEventListener("load", () => {
             }
 
             updateRuleControl(i);
+            addCustomRulesUrlFlag();
 
             if (previous !== rules[i]) {
                 rulesObservers.forEach((callback) => callback());
             }
         });
 
+        if (customRules) {
+            const values = Page.Tabs.getValues(controlId);
+            if (values.indexOf(Rule.BIRTH) >= 0) {
+                rules[i] = Rule.BIRTH;
+            } else if (values.indexOf(Rule.ALIVE) >= 0) {
+                rules[i] = Rule.ALIVE;
+            } else {
+                rules[i] = Rule.DEATH;
+            }
+        }
+
         updateRuleControl(i);
     }
+    rulesObservers.forEach((callback) => callback());
 });
 
 type ButtonObserver = () => void;
