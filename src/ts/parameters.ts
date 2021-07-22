@@ -6,7 +6,9 @@ enum Rule {
     BIRTH = "birth",
 }
 
-const DEFAULT_RULES: Rule[] = [
+type RulesSet = [Rule, Rule, Rule, Rule, Rule, Rule, Rule, Rule, Rule];
+
+const DEFAULT_RULES: RulesSet = [
     Rule.DEATH,
     Rule.DEATH,
     Rule.ALIVE,
@@ -18,7 +20,7 @@ const DEFAULT_RULES: Rule[] = [
     Rule.DEATH,
 ];
 
-const rules: Rule[] = DEFAULT_RULES.slice();
+const rules = DEFAULT_RULES.slice() as RulesSet;
 
 function updateRuleControl(id: number) {
     const controlId = `neighbours-tabs-${id}`;
@@ -249,7 +251,7 @@ class Parameters {
         return persistenceObservers;
     }
 
-    public static get rules(): Rule[] {
+    public static get rules(): RulesSet {
         return rules;
     }
     public static get rulesObservers(): RuleObserver[] {
