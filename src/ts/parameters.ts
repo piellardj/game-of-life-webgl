@@ -6,7 +6,7 @@ enum Rule {
     BIRTH = "birth",
 }
 
-const rules: Rule[] = [
+const DEFAULT_RULES: Rule[] = [
     Rule.DEATH,
     Rule.DEATH,
     Rule.ALIVE,
@@ -17,6 +17,8 @@ const rules: Rule[] = [
     Rule.DEATH,
     Rule.DEATH,
 ];
+
+const rules: Rule[] = DEFAULT_RULES.slice();
 
 function updateRuleControl(id: number) {
     const controlId = `neighbours-tabs-${id}`;
@@ -32,12 +34,33 @@ function updateRuleControl(id: number) {
 
 type RuleObserver = () => void;
 const rulesObservers: RuleObserver[] = [];
+function callRulesObservers(): void {
+    for (const observer of rulesObservers) {
+        observer();
+    }
+}
 
 const CUSTOM_RULE_FLAG = "customrules";
 function addCustomRulesUrlFlag(): void {
     if (typeof URLSearchParams !== "undefined") {
         const searchParamsObject = new URLSearchParams(window.location.search);
         searchParamsObject.set(CUSTOM_RULE_FLAG, "true");
+        const searchParams = searchParamsObject.toString();
+
+        const newUrl = window.location.origin + window.location.pathname + (searchParams ? `?${searchParams}` : "")
+        window.history.replaceState("", "", newUrl);
+    }
+
+    for (let i = 0; i < 9; i++) {
+        const controlId = `neighbours-tabs-${i}`;
+        Page.Tabs.storeState(controlId);
+    }
+}
+
+function removeCustomRulesUrlFlag(): void {
+    if (typeof URLSearchParams !== "undefined") {
+        const searchParamsObject = new URLSearchParams(window.location.search);
+        searchParamsObject.delete(CUSTOM_RULE_FLAG);
         const searchParams = searchParamsObject.toString();
 
         const newUrl = window.location.origin + window.location.pathname + (searchParams ? `?${searchParams}` : "")
@@ -73,7 +96,7 @@ window.addEventListener("load", () => {
             addCustomRulesUrlFlag();
 
             if (previous !== rules[i]) {
-                rulesObservers.forEach((callback) => callback());
+                callRulesObservers();
             }
         });
 
@@ -90,7 +113,24 @@ window.addEventListener("load", () => {
 
         updateRuleControl(i);
     }
-    rulesObservers.forEach((callback) => callback());
+
+    callRulesObservers();
+});
+
+Page.Button.addObserver("reset-rules-button-id", () => {
+    let somethingChanged = false;
+    for (let i = 0; i < 9; i++) {
+        somethingChanged = somethingChanged || (rules[i] !== DEFAULT_RULES[i]);
+        rules[i] = DEFAULT_RULES[i];
+        updateRuleControl(i);
+        Page.Tabs.clearStoredState(`neighbours-tabs-${i}`);
+    }
+
+    removeCustomRulesUrlFlag();
+
+    if (somethingChanged) {
+        callRulesObservers();
+    }
 });
 
 type ButtonObserver = () => void;

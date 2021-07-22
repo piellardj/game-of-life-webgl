@@ -269,6 +269,12 @@ const data = {
                             label: "Birth"
                         }
                     ]
+                },
+                {
+                    type: Demopage.supportedControls.Button,
+                    id: "reset-rules-button-id",
+                    label: "Reset rules",
+                    flat: true
                 }
             ]
         }
