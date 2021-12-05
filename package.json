@@ -1,8 +1,11 @@
 {
-  "name": "game-of-life-webg",
-  "description": "Game of Life running on GPU",
+  "name": "game-of-life-webgl",
   "homepage": "https://piellardj.github.io/game-of-life-webgl",
-  "main": "build/index.js",
+  "description": "Game of Life running on GPU",
+  "author": "Jérémie PIELLARD <jeremie.piellard@gmail.com> (https://github.com/piellardj)",
+  "repository": "github:piellardj/game-of-life-webgl",
+  "private": true,
+  "license": "ISC",
   "scripts": {
     "pre-commit": "npm run rebuild && npm run lint",
     "build-demo-js": "npm run webpack-production",
@@ -14,9 +17,6 @@
     "lint": "tslint -c src/config/tslint.json -p src/config/tsconfig.json",
     "webpack-production": "webpack --config src/config/webpack.config.js"
   },
-  "author": "Jérémie PIELLARD <jeremie.piellard@gmail.com> (https://github.com/piellardj)",
-  "repository": "github:piellardj/game-of-life-webgl",
-  "license": "ISC",
   "devDependencies": {
     "@types/node": "^16.4.0",
     "fs-extra": "^10.0.0",
