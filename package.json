@@ -17,9 +17,6 @@
     "lint": "tslint -c src/config/tslint.json -p src/config/tsconfig.json",
     "webpack-production": "webpack --config src/config/webpack.config.js"
   },
-  "engine": {
-    "node": ">=16.13.0"
-  },
   "devDependencies": {
     "@types/fs-extra": "^9.0.13",
     "@types/node": "^16.11.11",
