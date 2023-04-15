@@ -10,6 +10,10 @@ const data = {
         "The rules can be changed to see how the world evolves. You can use the mouse to zoom in and explore the world."
     ],
     githubProjectName: "game-of-life-webgl",
+    readme: {
+        filepath: path.join(__dirname, "..", "README.md"),
+        branchName: "master"
+    },
     additionalLinks: [],
     scriptFiles: [
         "script/main.min.js"
