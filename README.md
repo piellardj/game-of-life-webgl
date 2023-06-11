@@ -7,7 +7,10 @@ The rules can be changed to see how the world evolves. You can use the mouse to 
 
 See it live [here](https://piellardj.github.io/game-of-life-webgl/?page%3Acanvas%3Afullscreen=true&page%3Acanvas%3Asidepane=true).
 
+[![Donate](https://raw.githubusercontent.com/piellardj/piellardj.github.io/master/images/readme/donate-paypal.svg)](https://www.paypal.com/donate/?hosted_button_id=AF7H7GEJTL95E)
+
 ![Illustration](src/resources/README/illustration.png)
+
 ## Details
 
 ### Texel packing
